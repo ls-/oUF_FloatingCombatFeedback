@@ -10,7 +10,7 @@ $includedFiles = @(
 )
 
 $filesToRemove = @(
-    ".git",
+    ".git"
 )
 
 Remove-Item * -Include @("*.zip", $folderName) -Recurse -Force
