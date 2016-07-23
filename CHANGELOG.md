@@ -1,3 +1,8 @@
+## Version 2.02
+
+- Fixed text blinking issue;
+- Tweaked standard vertical scrolling.
+
 ## Version 2.01
 
 - Widget revamp;
