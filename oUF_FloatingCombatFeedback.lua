@@ -40,6 +40,7 @@ local schoolColors = {
 
 local function RemoveString(self, i, string)
 	tremove(self.FeedbackToAnimate, i)
+	string:SetText(nil)
 	string:SetAlpha(0)
 	string:Hide()
 
