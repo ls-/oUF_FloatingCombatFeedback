@@ -66,7 +66,7 @@ end
 
 local function StandardScroll(self)
 	local x = self.x
-	local y = self.y + self.yDirection * 65 * sin(90 * self.elapsed / self.scrollTime)
+	local y = self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
 
 	return x, y
 end
