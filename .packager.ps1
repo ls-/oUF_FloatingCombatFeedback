@@ -1,24 +1,44 @@
 Set-Location $PSScriptRoot
 
-$curVersion = if ((Get-Content ".\oUF_FloatingCombatFeedback.toc" | Where { $_ -match "Version: ([0-9]+\.[0-9]+)" } ) -match "([0-9]+\.[0-9]+)") {$matches[1]}
-$folderName = "oUF_FloatingCombatFeedback"
-$zipName = $folderName + "-" + $curVersion + ".zip"
+if (-Not (Test-Path "C:\PROGRA~1\7-Zip\7z.exe")) {
+	throw "7z.exe not found"
+}
+
+Set-Alias 7z "C:\PROGRA~1\7-Zip\7z.exe"
+
+$name = (Get-Item .).Name
+
+if (-Not (Test-Path (".\" + $name + ".toc"))) {
+	throw ".toc not found"
+}
+
+$version = if ((Get-Content (".\" + $name + ".toc") | Where {
+	$_ -match "Version: ([0-9]+\.[0-9]+)"
+}) -match "([0-9]+\.[0-9]+)") {
+	$matches[1]
+}
+
+if (-Not $version) {
+	throw "Bad version format"
+}
 
 $includedFiles = @(
-    ".\oUF_FloatingCombatFeedback.lua",
-    ".\oUF_FloatingCombatFeedback.toc"
+	".\oUF_FloatingCombatFeedback.lua",
+	".\oUF_FloatingCombatFeedback.toc"
 )
 
-$filesToRemove = @(
-    ".git"
-)
+if (Test-Path ".\temp\") {
+	Remove-Item ".\temp\" -Recurse -Force
+}
 
-Remove-Item * -Include @("*.zip", $folderName) -Recurse -Force
+New-Item -Path (".\temp\" + $name) -ItemType Directory | Out-Null
+Copy-Item $includedFiles -Destination (".\temp\" + $name) -Recurse
 
-New-Item -Name $folderName -ItemType Directory | Out-Null
-Copy-Item $includedFiles -Destination $folderName -Recurse
-Remove-Item $folderName -Include $filesToRemove -Recurse -Force
-Compress-Archive -Path $folderName -DestinationPath $zipName
-Move-Item ".\oUF_FloatingCombatFeedback-*.zip" -Destination "..\" -Force
+Set-Location ".\temp\"
 
-Remove-Item $folderName -Recurse -Force
+7z a -tzip -mx9 ($name + "-" + $version + ".zip") (Get-ChildItem -Path "..\temp")
+
+Set-Location "..\"
+
+Move-Item ".\temp\*.zip" -Destination "..\" -Force
+Remove-Item ".\temp" -Recurse -Force
