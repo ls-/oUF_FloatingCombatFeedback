@@ -1,5 +1,7 @@
 ## Version 70200.01
 
+- New version format: INTERFACE_VERSION.PATCH;
+- Added 7.2 support;
 - Added `.schoolColors` option to override school colours;
 - Refactored and optimised code.
 
