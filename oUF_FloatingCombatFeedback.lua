@@ -114,9 +114,10 @@ local function Update(self, event, unit, message, flag, amount, school)
 	if message == "WOUND" and not fcf.ignoreDamage then
 		if amount ~= 0	then
 			text = "-"..fcf.HandleNumbers(amount)
-			color = schoolColors[school] or
-					fcf.colors and fcf.colors[message] or
-					colors[message]
+			color = fcf.schoolColors and fcf.schoolColors[school]
+				or schoolColors[school]
+				or fcf.colors and fcf.colors[message]
+				or colors[message]
 
 			if flag == "CRITICAL" or flag == "CRUSHING" then
 				multiplier = 1.25
