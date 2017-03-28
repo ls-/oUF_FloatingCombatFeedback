@@ -1,6 +1,6 @@
-## Interface: 70000
+## Interface: 70200
 ## Author: lightspark
-## Version: 2.02
+## Version: 70200.01
 ## Title: oUF: FloatingCombatFeedback
 ## Notes: Floating Combat Feedback support for oUF layouts.
 ## RequiredDeps: oUF
