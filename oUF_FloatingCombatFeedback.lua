@@ -2,13 +2,24 @@ local _, ns = ...
 local oUF = ns.oUF or oUF
 assert(oUF, "oUF FloatingCombatFeedback was unable to locate oUF install")
 
-local _G = _G
-local pairs = pairs
-local cos, sin, mmax = cos, sin, math.max
-local tremove, tinsert = table.remove, table.insert
+local _G = getfenv(0)
+local pairs = _G.pairs
+local m_cos = _G.math.cos
+local m_max = _G.math.max
+local m_pi = _G.math.pi
+local m_sin = _G.math.sin
+local t_insert = _G.table.insert
+local t_remove = _G.table.remove
 
-local AbbreviateNumbers = AbbreviateNumbers
-local BreakUpLargeNumbers = BreakUpLargeNumbers
+-- sourced from FrameXML/Constants.lua
+local SCHOOL_MASK_NONE = _G.SCHOOL_MASK_NONE or 0x00
+local SCHOOL_MASK_PHYSICAL = _G.SCHOOL_MASK_PHYSICAL or 0x01
+local SCHOOL_MASK_HOLY = _G.SCHOOL_MASK_HOLY or 0x02
+local SCHOOL_MASK_FIRE = _G.SCHOOL_MASK_FIRE or 0x04
+local SCHOOL_MASK_NATURE = _G.SCHOOL_MASK_NATURE or 0x08
+local SCHOOL_MASK_FROST = _G.SCHOOL_MASK_FROST or 0x10
+local SCHOOL_MASK_SHADOW = _G.SCHOOL_MASK_SHADOW or 0x20
+local SCHOOL_MASK_ARCANE = _G.SCHOOL_MASK_ARCANE or 0x40
 
 local colors = {
 	ABSORB		= {r = 1.00, g = 1.00, b = 1.00},
@@ -28,18 +39,18 @@ local colors = {
 }
 
 local schoolColors = {
-	[SCHOOL_MASK_NONE]		= {r = 1.00, g = 1.00, b = 1.00},	-- 0x00 or 0
-	[SCHOOL_MASK_PHYSICAL]	= colors.WOUND,						-- 0x01 or 1
-	[SCHOOL_MASK_HOLY]		= {r = 1.00, g = 0.90, b = 0.50},	-- 0x02 or 2
-	[SCHOOL_MASK_FIRE]		= {r = 1.00, g = 0.50, b = 0.00},	-- 0x04 or 4
-	[SCHOOL_MASK_NATURE]	= {r = 0.30, g = 1.00, b = 0.30},	-- 0x08 or 8
-	[SCHOOL_MASK_FROST]		= {r = 0.50, g = 1.00, b = 1.00},	-- 0x10 or 16
-	[SCHOOL_MASK_SHADOW]	= {r = 0.50, g = 0.50, b = 1.00},	-- 0x20 or 32
-	[SCHOOL_MASK_ARCANE]	= {r = 1.00, g = 0.50, b = 1.00},	-- 0x40 or 64
+	[SCHOOL_MASK_NONE]		= {r = 1.00, g = 1.00, b = 1.00},
+	[SCHOOL_MASK_PHYSICAL]	= {r = 0.70, g = 0.10, b = 0.10},
+	[SCHOOL_MASK_HOLY]		= {r = 1.00, g = 0.90, b = 0.50},
+	[SCHOOL_MASK_FIRE]		= {r = 1.00, g = 0.50, b = 0.00},
+	[SCHOOL_MASK_NATURE]	= {r = 0.30, g = 1.00, b = 0.30},
+	[SCHOOL_MASK_FROST]		= {r = 0.50, g = 1.00, b = 1.00},
+	[SCHOOL_MASK_SHADOW]	= {r = 0.50, g = 0.50, b = 1.00},
+	[SCHOOL_MASK_ARCANE]	= {r = 1.00, g = 0.50, b = 1.00},
 }
 
 local function RemoveString(self, i, string)
-	tremove(self.FeedbackToAnimate, i)
+	t_remove(self.FeedbackToAnimate, i)
 	string:SetText(nil)
 	string:SetAlpha(0)
 	string:Hide()
@@ -48,7 +59,7 @@ local function RemoveString(self, i, string)
 end
 
 local function GetAvailableString(self)
-	for i = 1, self.maxStrings do
+	for i = 1, self.__max do
 		if not self[i]:IsShown() then
 			return self[i]
 		end
@@ -58,33 +69,26 @@ local function GetAvailableString(self)
 end
 
 local function FountainScroll(self)
-	local x = self.x + self.side * 65 * (1 - cos(90 * self.elapsed / self.scrollTime))
-	local y = self.y + self.yDirection * 65 * sin(90 * self.elapsed / self.scrollTime)
-
-	return x, y
+	return self.x + self.xDirection * 65 * (1 - m_cos(m_pi / 2 * self.elapsed / self.scrollTime)),
+		self.y + self.yDirection * 65 * m_sin(m_pi / 2 * self.elapsed / self.scrollTime)
 end
 
 local function StandardScroll(self)
-	local x = self.x
-	local y = self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
-
-	return x, y
+	return self.x,
+		self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
 end
 
 local function SetScrolling(self, elapsed)
-	local x, y
-
 	for index, string in pairs(self.FeedbackToAnimate) do
 		if string.elapsed >= string.scrollTime then
 			RemoveString(self, index, string)
 		else
 			string.elapsed = string.elapsed + elapsed
-			x, y = self.scrollFunction(string)
 
-			string:SetPoint("CENTER", self, "CENTER", x, y)
+			string:SetPoint("CENTER", self, "CENTER", self.Scroll(string))
 
 			if (string.elapsed >= self.fadeout) then
-				string:SetAlpha(mmax(1 - (string.elapsed - self.fadeout) / (self.scrollTime - self.fadeout), 0))
+				string:SetAlpha(m_max(1 - (string.elapsed - self.fadeout) / (self.scrollTime - self.fadeout), 0))
 			end
 		end
 	end
@@ -109,7 +113,7 @@ local function Update(self, event, unit, message, flag, amount, school)
 
 	if message == "WOUND" and not fcf.ignoreDamage then
 		if amount ~= 0	then
-			text = "-"..(fcf.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount))
+			text = "-"..fcf.HandleNumbers(amount)
 			color = schoolColors[school] or
 					fcf.colors and fcf.colors[message] or
 					colors[message]
@@ -124,14 +128,14 @@ local function Update(self, event, unit, message, flag, amount, school)
 			color = fcf.colors and fcf.colors[flag] or colors[flag]
 		end
 	elseif message == "ENERGIZE" and not fcf.ignoreEnergize then
-		text = "+"..(fcf.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount))
+		text = "+"..fcf.HandleNumbers(amount)
 		color = fcf.colors and fcf.colors[message] or colors[message]
 
 		if flag == "CRITICAL" then
 			multiplier = 1.25
 		end
 	elseif message == "HEAL" and not fcf.ignoreHeal then
-		text = "+"..(fcf.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount))
+		text = "+"..fcf.HandleNumbers(amount)
 		color = fcf.colors and fcf.colors[message] or colors[message]
 
 		if flag == "CRITICAL" then
@@ -145,22 +149,23 @@ local function Update(self, event, unit, message, flag, amount, school)
 	if text then
 		local string = GetAvailableString(fcf)
 
+		string.elapsed = 0
+		string.scrollTime = fcf.scrollTime
+		string.xDirection = fcf.xDirection
+		string.yDirection = fcf.yDirection
+		string.x = fcf.xOffset * string.xDirection
+		string.y = fcf.yOffset * string.yDirection
+
 		string:SetText(text)
 		string:SetTextHeight(fcf.fontHeight * multiplier)
 		string:SetTextColor(color.r, color.g, color.b)
-		string.elapsed = 0
-		string.scrollTime = fcf.scrollTime
-		string.side = fcf.side
-		string.yDirection = fcf.yDirection
-		string.x = fcf.xOffset * string.side
-		string.y = fcf.yOffset * string.yDirection
 		string:SetPoint("CENTER", fcf, "CENTER", string.x, string.y)
 		string:SetAlpha(1)
 		string:Show()
 
-		tinsert(fcf.FeedbackToAnimate, string)
+		t_insert(fcf.FeedbackToAnimate, string)
 
-		fcf.side = fcf.side * -1
+		fcf.xDirection = fcf.xDirection * -1
 
 		if not fcf:GetScript("OnUpdate") then
 			fcf:SetScript("OnUpdate", SetScrolling)
@@ -173,36 +178,37 @@ local function Path(self, ...)
 end
 
 local function ForceUpdate(element)
-	return Path(element.__owner, 'ForceUpdate', element.__owner.unit)
+	return Path(element.__owner, "ForceUpdate", element.__owner.unit)
 end
 
-local function Enable(self, unit)
+local function Enable(self)
 	local fcf = self.FloatingCombatFeedback
 
 	if not fcf then return end
 
 	fcf.__owner = self
-	fcf.maxStrings = #fcf
-	fcf.side = 1
+	fcf.__max = #fcf
+	fcf.ForceUpdate = ForceUpdate
+
 	fcf.scrollTime = fcf.scrollTime or 1.5
 	fcf.fadeout = fcf.scrollTime / 3
+	fcf.xDirection = 1
 	fcf.yDirection = fcf.yDirection or 1
 	fcf.fontHeight = fcf.fontHeight or 18
-	fcf.abbreviateNumbers = fcf.abbreviateNumbers
-	fcf.ForceUpdate = ForceUpdate
+	fcf.HandleNumbers = fcf.abbreviateNumbers and _G.AbbreviateNumbers or _G.BreakUpLargeNumbers
 	fcf.FeedbackToAnimate = {}
 
 	if fcf.mode == "Fountain" then
-		fcf.scrollFunction = FountainScroll
+		fcf.Scroll = FountainScroll
 		fcf.xOffset = fcf.xOffset or 6
 		fcf.yOffset = fcf.yOffset or 8
 	else
-		fcf.scrollFunction = StandardScroll
+		fcf.Scroll = StandardScroll
 		fcf.xOffset = fcf.xOffset or 30
 		fcf.yOffset = fcf.yOffset or 8
 	end
 
-	for i = 1, fcf.maxStrings do
+	for i = 1, fcf.__max do
 		fcf[i]:Hide()
 	end
 
