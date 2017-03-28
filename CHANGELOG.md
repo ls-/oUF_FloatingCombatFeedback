@@ -1,3 +1,8 @@
+## Version 70200.01
+
+- Added `.schoolColors` option to override school colours;
+- Refactored and optimised code.
+
 ## Version 2.02
 
 - Fixed text blinking issue;
