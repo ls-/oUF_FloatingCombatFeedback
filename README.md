@@ -10,13 +10,13 @@ oUF: FloatingCombatFeedback is a plug-in for oUF framework, and provides floatin
 
 ## Usage
 To use this plug-in you have to create two things:
-- This frames is the main widget, it'll also be used as the anchor for and the table of feedback FontStrings:
+- A Frame. It'll be used as the anchor and the "container" for feedback FontStrings:
 ```Lua
 local fcf = CreateFrame("Frame", nil, self)
 fcf:SetSize(32, 32)
 fcf:SetPoint("CENTER")
 ```
-- You can create as many feedback FontStrings as you want, but I recommend to create only 4-8 of them:
+- FontStrings. You can create as many feedback FontStrings as you want, but I recommend to create only 4-8 of them:
 ```Lua
 for i = 1, 6 do
 	fcf[i] = fcf:CreateFontString(nil, "OVERLAY", "CombatTextFont")
