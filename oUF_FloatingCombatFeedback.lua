@@ -11,6 +11,9 @@ local m_sin = _G.math.sin
 local t_insert = _G.table.insert
 local t_remove = _G.table.remove
 
+local AbbreviateNumbers = _G.AbbreviateNumbers
+local BreakUpLargeNumbers = _G.BreakUpLargeNumbers
+
 -- sourced from FrameXML/Constants.lua
 local SCHOOL_MASK_NONE = _G.SCHOOL_MASK_NONE or 0x00
 local SCHOOL_MASK_PHYSICAL = _G.SCHOOL_MASK_PHYSICAL or 0x01
@@ -49,7 +52,7 @@ local schoolColors = {
 	[SCHOOL_MASK_ARCANE]	= {r = 1.00, g = 0.50, b = 1.00},
 }
 
-local function RemoveString(self, i, string)
+local function removeString(self, i, string)
 	t_remove(self.FeedbackToAnimate, i)
 	string:SetText(nil)
 	string:SetAlpha(0)
@@ -58,30 +61,30 @@ local function RemoveString(self, i, string)
 	return string
 end
 
-local function GetAvailableString(self)
+local function getAvailableString(self)
 	for i = 1, self.__max do
 		if not self[i]:IsShown() then
 			return self[i]
 		end
 	end
 
-	return RemoveString(self, 1, self.FeedbackToAnimate[1])
+	return removeString(self, 1, self.FeedbackToAnimate[1])
 end
 
-local function FountainScroll(self)
+local function fountainScroll(self)
 	return self.x + self.xDirection * 65 * (1 - m_cos(m_pi / 2 * self.elapsed / self.scrollTime)),
 		self.y + self.yDirection * 65 * m_sin(m_pi / 2 * self.elapsed / self.scrollTime)
 end
 
-local function StandardScroll(self)
+local function standardScroll(self)
 	return self.x,
 		self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
 end
 
-local function SetScrolling(self, elapsed)
+local function onUpdate(self, elapsed)
 	for index, string in pairs(self.FeedbackToAnimate) do
 		if string.elapsed >= string.scrollTime then
-			RemoveString(self, index, string)
+			removeString(self, index, string)
 		else
 			string.elapsed = string.elapsed + elapsed
 
@@ -98,25 +101,30 @@ local function SetScrolling(self, elapsed)
 	end
 end
 
-local function OnShow(self)
+local function onShow(self)
 	for index, string in pairs(self.FeedbackToAnimate) do
-		RemoveString(self, index, string)
+		removeString(self, index, string)
 	end
 end
 
 local function Update(self, event, unit, message, flag, amount, school)
 	if self.unit ~= unit then return end
 
-	local fcf = self.FloatingCombatFeedback
+	local element = self.FloatingCombatFeedback
 	local multiplier = 1
 	local text, color
 
-	if message == "WOUND" and not fcf.ignoreDamage then
+	if message == "WOUND" and not element.ignoreDamage then
 		if amount ~= 0	then
-			text = "-"..fcf.HandleNumbers(amount)
-			color = fcf.schoolColors and fcf.schoolColors[school]
+			if element.abbreviateNumbers then
+				text = "-"..AbbreviateNumbers(amount)
+			else
+				text = "-"..BreakUpLargeNumbers(amount)
+			end
+
+			color = element.schoolColors and element.schoolColors[school]
 				or schoolColors[school]
-				or fcf.colors and fcf.colors[message]
+				or element.colors and element.colors[message]
 				or colors[message]
 
 			if flag == "CRITICAL" or flag == "CRUSHING" then
@@ -124,52 +132,64 @@ local function Update(self, event, unit, message, flag, amount, school)
 			elseif flag == "GLANCING" then
 				multiplier = 0.75
 			end
-		elseif flag and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" and not fcf.ignoreMisc then
+		elseif flag and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" and not element.ignoreMisc then
 			text = _G[flag]
-			color = fcf.colors and fcf.colors[flag] or colors[flag]
+			color = element.colors and element.colors[flag] or colors[flag]
 		end
-	elseif message == "ENERGIZE" and not fcf.ignoreEnergize then
-		text = "+"..fcf.HandleNumbers(amount)
-		color = fcf.colors and fcf.colors[message] or colors[message]
+	elseif message == "ENERGIZE" and not element.ignoreEnergize then
+		if element.abbreviateNumbers then
+			text = "+"..AbbreviateNumbers(amount)
+		else
+			text = "+"..BreakUpLargeNumbers(amount)
+		end
+
+		color = element.colors and element.colors[message] or colors[message]
 
 		if flag == "CRITICAL" then
 			multiplier = 1.25
 		end
-	elseif message == "HEAL" and not fcf.ignoreHeal then
-		text = "+"..fcf.HandleNumbers(amount)
-		color = fcf.colors and fcf.colors[message] or colors[message]
+	elseif message == "HEAL" and not element.ignoreHeal then
+		if element.abbreviateNumbers then
+			text = "+"..AbbreviateNumbers(amount)
+		else
+			text = "+"..BreakUpLargeNumbers(amount)
+		end
+
+		color = element.colors and element.colors[message] or colors[message]
 
 		if flag == "CRITICAL" then
 			multiplier = 1.25
 		end
-	elseif not fcf.ignoreMisc then
+	elseif not element.ignoreMisc then
 		text = _G[message]
-		color = fcf.colors and fcf.colors[message] or colors[message]
+		color = element.colors and element.colors[message] or colors[message]
 	end
 
 	if text then
-		local string = GetAvailableString(fcf)
+		local string = getAvailableString(element)
 
 		string.elapsed = 0
-		string.scrollTime = fcf.scrollTime
-		string.xDirection = fcf.xDirection
-		string.yDirection = fcf.yDirection
-		string.x = fcf.xOffset * string.xDirection
-		string.y = fcf.yOffset * string.yDirection
+		string.scrollTime = element.scrollTime
+		string.xDirection = element.xDirection
+		string.yDirection = element.yDirection
+		string.x = element.xOffset * string.xDirection
+		string.y = element.yOffset * string.yDirection
 
 		string:SetText(text)
-		string:SetTextHeight(fcf.fontHeight * multiplier)
+		string:SetTextHeight(element.fontHeight * multiplier)
 		string:SetTextColor(color.r, color.g, color.b)
-		string:SetPoint("CENTER", fcf, "CENTER", string.x, string.y)
+		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
 		string:SetAlpha(1)
 		string:Show()
 
-		t_insert(fcf.FeedbackToAnimate, string)
+		t_insert(element.FeedbackToAnimate, string)
 
-		fcf.xDirection = fcf.xDirection * -1
+		element.xDirection = element.xDirection * -1
 
-		if not fcf:GetScript("OnUpdate") then
-			fcf:SetScript("OnUpdate", SetScrolling)
+		if not element:GetScript("OnUpdate") then
+			element.Scroll = element.mode == "Fountain" and fountainScroll or standardScroll
+
+			element:SetScript("OnUpdate", onUpdate)
 		end
 	end
 end
@@ -183,37 +203,33 @@ local function ForceUpdate(element)
 end
 
 local function Enable(self)
-	local fcf = self.FloatingCombatFeedback
+	local element = self.FloatingCombatFeedback
 
-	if not fcf then return end
+	if not element then return end
 
-	fcf.__owner = self
-	fcf.__max = #fcf
-	fcf.ForceUpdate = ForceUpdate
+	element.__owner = self
+	element.__max = #element
+	element.ForceUpdate = ForceUpdate
 
-	fcf.scrollTime = fcf.scrollTime or 1.5
-	fcf.fadeout = fcf.scrollTime / 3
-	fcf.xDirection = 1
-	fcf.yDirection = fcf.yDirection or 1
-	fcf.fontHeight = fcf.fontHeight or 18
-	fcf.HandleNumbers = fcf.abbreviateNumbers and _G.AbbreviateNumbers or _G.BreakUpLargeNumbers
-	fcf.FeedbackToAnimate = {}
+	element.scrollTime = element.scrollTime or 1.5
+	element.fadeout = element.scrollTime / 3
+	element.xDirection = 1
+	element.yDirection = element.yDirection or 1
+	element.yOffset = element.yOffset or 8
+	element.fontHeight = element.fontHeight or 18
+	element.FeedbackToAnimate = {}
 
-	if fcf.mode == "Fountain" then
-		fcf.Scroll = FountainScroll
-		fcf.xOffset = fcf.xOffset or 6
-		fcf.yOffset = fcf.yOffset or 8
+	if element.mode == "Fountain" then
+		element.xOffset = element.xOffset or 6
 	else
-		fcf.Scroll = StandardScroll
-		fcf.xOffset = fcf.xOffset or 30
-		fcf.yOffset = fcf.yOffset or 8
+		element.xOffset = element.xOffset or 30
 	end
 
-	for i = 1, fcf.__max do
-		fcf[i]:Hide()
+	for i = 1, element.__max do
+		element[i]:Hide()
 	end
 
-	fcf:HookScript("OnShow", OnShow)
+	element:SetScript("OnShow", onShow)
 
 	self:RegisterEvent("UNIT_COMBAT", Path)
 
@@ -221,9 +237,11 @@ local function Enable(self)
 end
 
 local function Disable(self)
-	local fcf = self.FloatingCombatFeedback
+	local element = self.FloatingCombatFeedback
 
-	if fcf then
+	if element then
+		element:SetScript("OnShow", nil)
+
 		self:UnregisterEvent("UNIT_COMBAT", Path)
 	end
 end
