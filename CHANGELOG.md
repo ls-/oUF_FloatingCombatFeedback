@@ -1,3 +1,7 @@
+## Version 70200.02
+
+- Made sure that it's possible to update all options on the fly.
+
 ## Version 70200.01
 
 - New version format: INTERFACE_VERSION.PATCH;
