@@ -108,14 +108,14 @@ local function onShowHide(self)
 	end
 end
 
-local function Update(self, event, unit, message, flag, amount, school)
+local function Update(self, _, unit, event, flag, amount, school)
 	if self.unit ~= unit then return end
 
 	local element = self.FloatingCombatFeedback
 	local multiplier = 1
 	local text, color
 
-	if message == "WOUND" and not element.ignoreDamage then
+	if event == "WOUND" and not element.ignoreDamage then
 		if amount ~= 0	then
 			if element.abbreviateNumbers then
 				text = "-"..AbbreviateNumbers(amount)
@@ -123,10 +123,8 @@ local function Update(self, event, unit, message, flag, amount, school)
 				text = "-"..BreakUpLargeNumbers(amount)
 			end
 
-			color = element.schoolColors and element.schoolColors[school]
-				or schoolColors[school]
-				or element.colors and element.colors[message]
-				or colors[message]
+			color = element.schoolColors and element.schoolColors[school] or schoolColors[school]
+				or element.colors and element.colors[event] or colors[event]
 
 			if flag == "CRITICAL" or flag == "CRUSHING" then
 				multiplier = 1.25
@@ -137,33 +135,33 @@ local function Update(self, event, unit, message, flag, amount, school)
 			text = _G[flag]
 			color = element.colors and element.colors[flag] or colors[flag]
 		end
-	elseif message == "ENERGIZE" and not element.ignoreEnergize then
+	elseif event == "ENERGIZE" and not element.ignoreEnergize then
 		if element.abbreviateNumbers then
 			text = "+"..AbbreviateNumbers(amount)
 		else
 			text = "+"..BreakUpLargeNumbers(amount)
 		end
 
-		color = element.colors and element.colors[message] or colors[message]
+		color = element.colors and element.colors[event] or colors[event]
 
 		if flag == "CRITICAL" then
 			multiplier = 1.25
 		end
-	elseif message == "HEAL" and not element.ignoreHeal then
+	elseif event == "HEAL" and not element.ignoreHeal then
 		if element.abbreviateNumbers then
 			text = "+"..AbbreviateNumbers(amount)
 		else
 			text = "+"..BreakUpLargeNumbers(amount)
 		end
 
-		color = element.colors and element.colors[message] or colors[message]
+		color = element.colors and element.colors[event] or colors[event]
 
 		if flag == "CRITICAL" then
 			multiplier = 1.25
 		end
 	elseif not element.ignoreMisc then
-		text = _G[message]
-		color = element.colors and element.colors[message] or colors[message]
+		text = _G[event]
+		color = element.colors and element.colors[event] or colors[event]
 	end
 
 	if text then
