@@ -126,7 +126,7 @@ local function removeString(self, i, string)
 	return string
 end
 
-local function getAvailableString(self)
+local function getString(self)
 	for i = 1, #self do
 		if not self[i]:IsShown() then
 			return self[i]
@@ -206,7 +206,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		local animation = element.animationsByFlag and element.animationsByFlag[flag] or animationsByFlag[flag]
 			or element.animationsByEvent and element.animationsByEvent[event] or animationsByEvent[event]
 			or "fountain"
-		local string = getAvailableString(element)
+		local string = getString(element)
 
 		string.elapsed = 0
 		string.GetXY = animations[animation]
