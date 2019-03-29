@@ -239,34 +239,33 @@ end
 
 local function Enable(self)
 	local element = self.FloatingCombatFeedback
-	if not element then return end
+	if element then
+		element.__owner = self
+		element.ForceUpdate = ForceUpdate
+		element.FeedbackToAnimate = {}
 
-	element.__owner = self
-	element.ForceUpdate = ForceUpdate
-	element.FeedbackToAnimate = {}
+		element.scrollTime = element.scrollTime or 1.5
+		element.fadeout = element.scrollTime / 3
+		element.fontHeight = element.fontHeight or 18
+		element.xDirection = 1
+		element.yDirection = element.yDirection or 1
 
-	element.scrollTime = element.scrollTime or 1.5
-	element.fadeout = element.scrollTime / 3
-	element.fontHeight = element.fontHeight or 18
-	element.xDirection = 1
-	element.yDirection = element.yDirection or 1
+		for i = 1, #element do
+			element[i]:Hide()
+		end
 
-	for i = 1, #element do
-		element[i]:Hide()
+		element:SetScript("OnHide", onShowHide)
+		element:SetScript("OnShow", onShowHide)
+		element:SetScript("OnUpdate", onUpdate)
+
+		self:RegisterEvent("UNIT_COMBAT", Path)
+
+		return true
 	end
-
-	element:SetScript("OnHide", onShowHide)
-	element:SetScript("OnShow", onShowHide)
-	element:SetScript("OnUpdate", onUpdate)
-
-	self:RegisterEvent("UNIT_COMBAT", Path)
-
-	return true
 end
 
 local function Disable(self)
 	local element = self.FloatingCombatFeedback
-
 	if element then
 		element:SetScript("OnHide", nil)
 		element:SetScript("OnShow", nil)
