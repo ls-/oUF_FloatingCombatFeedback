@@ -145,7 +145,7 @@ local function onUpdate(self, elapsed)
 
 			string:SetPoint("CENTER", self, "CENTER", string:GetXY())
 
-			if (string.elapsed >= self.fadeout) then
+			if string.elapsed >= self.fadeout then
 				string:SetAlpha(m_max(1 - (string.elapsed - self.fadeout) / (self.scrollTime - self.fadeout), 0))
 			end
 		end
@@ -170,9 +170,9 @@ local function Update(self, _, unit, event, flag, amount, school)
 	if event == "WOUND" and not element.ignoreDamage then
 		if amount ~= 0	then
 			if element.abbreviateNumbers then
-				text = "-"..AbbreviateNumbers(amount)
+				text = "-" .. AbbreviateNumbers(amount)
 			else
-				text = "-"..BreakUpLargeNumbers(amount)
+				text = "-" .. BreakUpLargeNumbers(amount)
 			end
 
 			color = element.schoolColors and element.schoolColors[school] or schoolColors[school]
@@ -183,17 +183,17 @@ local function Update(self, _, unit, event, flag, amount, school)
 		end
 	elseif event == "ENERGIZE" and not element.ignoreEnergize then
 		if element.abbreviateNumbers then
-			text = "+"..AbbreviateNumbers(amount)
+			text = "+" .. AbbreviateNumbers(amount)
 		else
-			text = "+"..BreakUpLargeNumbers(amount)
+			text = "+" .. BreakUpLargeNumbers(amount)
 		end
 
 		color = element.colors and element.colors[event] or colors[event]
 	elseif event == "HEAL" and not element.ignoreHeal then
 		if element.abbreviateNumbers then
-			text = "+"..AbbreviateNumbers(amount)
+			text = "+" .. AbbreviateNumbers(amount)
 		else
-			text = "+"..BreakUpLargeNumbers(amount)
+			text = "+" .. BreakUpLargeNumbers(amount)
 		end
 
 		color = element.colors and element.colors[event] or colors[event]
@@ -213,8 +213,8 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.scrollTime = element.scrollTime
 		string.xDirection = element.xDirection
 		string.yDirection = element.yDirection
-		string.x = (element.xOffsetsByAnimation and element.xOffsetsByAnimation[animation] or xOffsetsByAnimation[animation]) * string.xDirection
-		string.y = (element.yOffsetsByAnimation and element.yOffsetsByAnimation[animation] or yOffsetsByAnimation[animation]) * string.yDirection
+		string.x = string.xDirection * (element.xOffsetsByAnimation and element.xOffsetsByAnimation[animation] or xOffsetsByAnimation[animation])
+		string.y = string.yDirection * (element.yOffsetsByAnimation and element.yOffsetsByAnimation[animation] or yOffsetsByAnimation[animation])
 
 		string:SetText(text)
 		string:SetTextHeight(element.fontHeight * (element.multipliersByFlag and element.multipliersByFlag[flag] or multipliersByFlag[flag] or multipliersByFlag[" "]))
@@ -236,11 +236,11 @@ local function Update(self, _, unit, event, flag, amount, school)
 end
 
 local function Path(self, ...)
-	return (self.FloatingCombatFeedback.Override or Update) (self, ...)
+	(self.FloatingCombatFeedback.Override or Update) (self, ...)
 end
 
 local function ForceUpdate(element)
-	return Path(element.__owner, "ForceUpdate", element.__owner.unit)
+	Path(element.__owner, "ForceUpdate", element.__owner.unit)
 end
 
 local function Enable(self)
