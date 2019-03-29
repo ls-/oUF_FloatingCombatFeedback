@@ -225,7 +225,13 @@ local function Update(self, _, unit, event, flag, amount, school)
 
 		t_insert(element.FeedbackToAnimate, string)
 
-		element.xDirection = element.xDirection * -1
+		if element.alternateX then
+			element.xDirection = element.xDirection * -1
+		end
+
+		if element.alternateY then
+			element.yDirection = element.yDirection * -1
+		end
 	end
 end
 
@@ -247,8 +253,16 @@ local function Enable(self)
 		element.scrollTime = element.scrollTime or 1.5
 		element.fadeout = element.scrollTime / 3
 		element.fontHeight = element.fontHeight or 18
-		element.xDirection = 1
+		element.xDirection = element.xDirection or 1
 		element.yDirection = element.yDirection or 1
+
+		if element.alternateX == nil then
+			element.alternateX = true
+		end
+
+		if element.alternateY == nil then
+			element.alternateY = false
+		end
 
 		for i = 1, #element do
 			element[i]:Hide()
