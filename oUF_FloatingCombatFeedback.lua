@@ -217,7 +217,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.y = (element.yOffsetsByAnimation and element.yOffsetsByAnimation[animation] or yOffsetsByAnimation[animation]) * string.yDirection
 
 		string:SetText(text)
-		string:SetTextHeight(element.fontHeight * (multipliersByFlag[flag] or multipliersByFlag[" "]))
+		string:SetTextHeight(element.fontHeight * (element.multipliersByFlag and element.multipliersByFlag[flag] or multipliersByFlag[flag] or multipliersByFlag[" "]))
 		string:SetTextColor(color.r, color.g, color.b)
 		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
 		string:SetAlpha(1)
