@@ -63,7 +63,7 @@ local function removeString(self, i, string)
 end
 
 local function getAvailableString(self)
-	for i = 1, self.__max do
+	for i = 1, #self do
 		if not self[i]:IsShown() then
 			return self[i]
 		end
@@ -101,7 +101,7 @@ end
 local function onShowHide(self)
 	t_wipe(self.FeedbackToAnimate)
 
-	for i = 1, self.__max do
+	for i = 1, #self do
 		self[i]:SetText(nil)
 		self[i]:SetAlpha(0)
 		self[i]:Hide()
@@ -200,7 +200,6 @@ local function Enable(self)
 	if not element then return end
 
 	element.__owner = self
-	element.__max = #element
 	element.ForceUpdate = ForceUpdate
 
 	element.scrollTime = element.scrollTime or 1.5
@@ -219,7 +218,7 @@ local function Enable(self)
 		element.Scroll = standardScroll
 	end
 
-	for i = 1, element.__max do
+	for i = 1, #element do
 		element[i]:Hide()
 	end
 
