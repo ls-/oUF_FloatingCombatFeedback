@@ -95,10 +95,6 @@ local function onUpdate(self, elapsed)
 			end
 		end
 	end
-
-	if #self.FeedbackToAnimate == 0 then
-		self:SetScript("OnUpdate", nil)
-	end
 end
 
 local function onShow(self)
@@ -185,12 +181,6 @@ local function Update(self, event, unit, message, flag, amount, school)
 		t_insert(element.FeedbackToAnimate, string)
 
 		element.xDirection = element.xDirection * -1
-
-		if not element:GetScript("OnUpdate") then
-			element.Scroll = element.mode == "Fountain" and fountainScroll or standardScroll
-
-			element:SetScript("OnUpdate", onUpdate)
-		end
 	end
 end
 
@@ -204,7 +194,6 @@ end
 
 local function Enable(self)
 	local element = self.FloatingCombatFeedback
-
 	if not element then return end
 
 	element.__owner = self
@@ -221,8 +210,10 @@ local function Enable(self)
 
 	if element.mode == "Fountain" then
 		element.xOffset = element.xOffset or 6
+		element.Scroll = fountainScroll
 	else
 		element.xOffset = element.xOffset or 30
+		element.Scroll = standardScroll
 	end
 
 	for i = 1, element.__max do
@@ -230,6 +221,7 @@ local function Enable(self)
 	end
 
 	element:SetScript("OnShow", onShow)
+	element:SetScript("OnUpdate", onUpdate)
 
 	self:RegisterEvent("UNIT_COMBAT", Path)
 
@@ -241,6 +233,7 @@ local function Disable(self)
 
 	if element then
 		element:SetScript("OnShow", nil)
+		element:SetScript("OnUpdate", nil)
 
 		self:UnregisterEvent("UNIT_COMBAT", Path)
 	end
