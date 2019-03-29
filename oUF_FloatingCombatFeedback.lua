@@ -7,7 +7,7 @@ local m_cos = _G.math.cos
 local m_max = _G.math.max
 local m_pi = _G.math.pi
 local m_sin = _G.math.sin
-local pairs = _G.pairs
+local next = _G.next
 local t_insert = _G.table.insert
 local t_remove = _G.table.remove
 local t_wipe = _G.table.wipe
@@ -137,7 +137,7 @@ local function getString(self)
 end
 
 local function onUpdate(self, elapsed)
-	for index, string in pairs(self.FeedbackToAnimate) do
+	for index, string in next, self.FeedbackToAnimate do
 		if string.elapsed >= string.scrollTime then
 			removeString(self, index, string)
 		else
