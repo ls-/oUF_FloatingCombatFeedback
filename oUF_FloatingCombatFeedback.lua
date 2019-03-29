@@ -3,13 +3,14 @@ local oUF = ns.oUF or oUF
 assert(oUF, "oUF FloatingCombatFeedback was unable to locate oUF install")
 
 local _G = getfenv(0)
-local pairs = _G.pairs
 local m_cos = _G.math.cos
 local m_max = _G.math.max
 local m_pi = _G.math.pi
 local m_sin = _G.math.sin
+local pairs = _G.pairs
 local t_insert = _G.table.insert
 local t_remove = _G.table.remove
+local t_wipe = _G.table.wipe
 
 local AbbreviateNumbers = _G.AbbreviateNumbers
 local BreakUpLargeNumbers = _G.BreakUpLargeNumbers
@@ -97,9 +98,13 @@ local function onUpdate(self, elapsed)
 	end
 end
 
-local function onShow(self)
-	for index, string in pairs(self.FeedbackToAnimate) do
-		removeString(self, index, string)
+local function onShowHide(self)
+	t_wipe(self.FeedbackToAnimate)
+
+	for i = 1, self.__max do
+		self[i]:SetText(nil)
+		self[i]:SetAlpha(0)
+		self[i]:Hide()
 	end
 end
 
@@ -220,7 +225,8 @@ local function Enable(self)
 		element[i]:Hide()
 	end
 
-	element:SetScript("OnShow", onShow)
+	element:SetScript("OnHide", onShowHide)
+	element:SetScript("OnShow", onShowHide)
 	element:SetScript("OnUpdate", onUpdate)
 
 	self:RegisterEvent("UNIT_COMBAT", Path)
@@ -232,6 +238,7 @@ local function Disable(self)
 	local element = self.FloatingCombatFeedback
 
 	if element then
+		element:SetScript("OnHide", nil)
 		element:SetScript("OnShow", nil)
 		element:SetScript("OnUpdate", nil)
 
