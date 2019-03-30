@@ -224,24 +224,15 @@ local function Update(self, _, unit, event, flag, amount, school)
 
 	animation = element.animationsByFlag[flag] or animation
 
-	local text, sign, color
+	local text, color
 	if event == "WOUND" then
 		if amount ~= 0	then
 			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
-			sign = "-"
 		elseif flag ~= "" and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
 			text = _G[flag]
 		end
 
 		color = element.schoolColors[school] or element.colors[event]
-	elseif event == "ENERGIZE" then
-		text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
-		sign = "+"
-		color = element.colors[event]
-	elseif event == "HEAL" then
-		text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
-		sign = "+"
-		color = element.colors[event]
 	else
 		if amount ~= 0 then
 			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
@@ -263,7 +254,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.x = string.xDirection * element.xOffsetsByAnimation[animation]
 		string.y = string.yDirection * element.yOffsetsByAnimation[animation]
 
-		string:SetFormattedText(element.format, text, sign or "")
+		string:SetText(text)
 		string:SetTextHeight(element.fontHeight * element.multipliersByFlag[flag])
 		string:SetTextColor(color.r, color.g, color.b)
 		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
@@ -304,7 +295,6 @@ local function Enable(self)
 		element.scrollTime = element.scrollTime or 1.2
 		element.fadeTime = element.fadeTime or element.scrollTime / 3
 		element.fontHeight = element.fontHeight or 18
-		element.format = element.format or "%1$s"
 		element.radius = element.radius or 65
 		element.xDirection = element.xDirection or 1
 		element.yDirection = element.yDirection or 1
