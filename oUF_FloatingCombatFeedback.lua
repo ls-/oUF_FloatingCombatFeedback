@@ -4,7 +4,6 @@ assert(oUF, "oUF FloatingCombatFeedback was unable to locate oUF install")
 
 local _G = getfenv(0)
 local m_cos = _G.math.cos
-local m_max = _G.math.max
 local m_pi = _G.math.pi
 local m_random = _G.math.random
 local m_sin = _G.math.sin
@@ -34,6 +33,16 @@ local function copyTable(src, dst)
 	end
 
 	return dst
+end
+
+local function clamp(v)
+	if v > 1 then
+		return 1
+	elseif v < 0 then
+		return 0
+	end
+
+	return v
 end
 
 -- sourced from FrameXML/Constants.lua
@@ -180,9 +189,8 @@ local function onUpdate(self, elapsed)
 			string:SetPoint("CENTER", self, "CENTER", string:GetXY())
 
 			string.elapsed = string.elapsed + elapsed
-			if string.elapsed >= self.fadeTime then
-				string:SetAlpha(m_max(1 - (string.elapsed - self.fadeTime) / (self.scrollTime - self.fadeTime), 0))
-			end
+
+			string:SetAlpha(clamp(1 - (string.elapsed - self.fadeTime) / (self.scrollTime - self.fadeTime)))
 		end
 	end
 
