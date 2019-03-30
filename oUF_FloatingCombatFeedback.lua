@@ -11,9 +11,28 @@ local next = _G.next
 local t_insert = _G.table.insert
 local t_remove = _G.table.remove
 local t_wipe = _G.table.wipe
+local type = _G.type
 
 local AbbreviateNumbers = _G.AbbreviateNumbers
 local BreakUpLargeNumbers = _G.BreakUpLargeNumbers
+
+local function copyTable(src, dst)
+	if type(dst) ~= "table" then
+		dst = {}
+	end
+
+	for k, v in next, src do
+		if type(v) == "table" then
+			dst[k] = copyTable(v, dst[k])
+		else
+			if dst[k] == nil then
+				dst[k] = v
+			end
+		end
+	end
+
+	return dst
+end
 
 -- sourced from FrameXML/Constants.lua
 local SCHOOL_MASK_NONE = _G.SCHOOL_MASK_NONE or 0x00
@@ -180,11 +199,10 @@ local function Update(self, _, unit, event, flag, amount, school)
 				text = "-" .. BreakUpLargeNumbers(amount)
 			end
 
-			color = element.schoolColors and element.schoolColors[school] or schoolColors[school]
-				or element.colors and element.colors[event] or colors[event]
-		elseif flag and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" and not element.ignoreMisc then
+			color = element.schoolColors[school] or element.colors[event]
+		elseif flag and flag ~= " " and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" and not element.ignoreMisc then
 			text = _G[flag]
-			color = element.colors and element.colors[flag] or colors[flag]
+			color = element.colors[flag]
 		end
 	elseif event == "ENERGIZE" and not element.ignoreEnergize then
 		if element.abbreviateNumbers then
@@ -193,7 +211,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 			text = "+" .. BreakUpLargeNumbers(amount)
 		end
 
-		color = element.colors and element.colors[event] or colors[event]
+		color = element.colors[event]
 	elseif event == "HEAL" and not element.ignoreHeal then
 		if element.abbreviateNumbers then
 			text = "+" .. AbbreviateNumbers(amount)
@@ -201,16 +219,14 @@ local function Update(self, _, unit, event, flag, amount, school)
 			text = "+" .. BreakUpLargeNumbers(amount)
 		end
 
-		color = element.colors and element.colors[event] or colors[event]
+		color = element.colors[event]
 	elseif not element.ignoreMisc then
 		text = _G[event]
-		color = element.colors and element.colors[event] or colors[event]
+		color = element.colors[event]
 	end
 
 	if text then
-		local animation = element.animationsByFlag and element.animationsByFlag[flag] or animationsByFlag[flag]
-			or element.animationsByEvent and element.animationsByEvent[event] or animationsByEvent[event]
-			or "fountain"
+		local animation = element.animationsByFlag[flag] or element.animationsByEvent[event]
 		local string = getString(element)
 
 		string.elapsed = 0
@@ -218,11 +234,11 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.scrollTime = element.scrollTime
 		string.xDirection = element.xDirection
 		string.yDirection = element.yDirection
-		string.x = string.xDirection * (element.xOffsetsByAnimation and element.xOffsetsByAnimation[animation] or xOffsetsByAnimation[animation])
-		string.y = string.yDirection * (element.yOffsetsByAnimation and element.yOffsetsByAnimation[animation] or yOffsetsByAnimation[animation])
+		string.x = string.xDirection * element.xOffsetsByAnimation[animation]
+		string.y = string.yDirection * element.yOffsetsByAnimation[animation]
 
 		string:SetText(text)
-		string:SetTextHeight(element.fontHeight * (element.multipliersByFlag and element.multipliersByFlag[flag] or multipliersByFlag[flag] or multipliersByFlag[" "]))
+		string:SetTextHeight(element.fontHeight * element.multipliersByFlag[flag])
 		string:SetTextColor(color.r, color.g, color.b)
 		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
 		string:SetAlpha(1)
@@ -272,6 +288,14 @@ local function Enable(self)
 		for i = 1, #element do
 			element[i]:Hide()
 		end
+
+		element.colors = copyTable(colors, element.colors)
+		element.schoolColors = copyTable(schoolColors, element.schoolColors)
+		element.animationsByEvent = copyTable(animationsByEvent, element.animationsByEvent)
+		element.animationsByFlag = copyTable(animationsByFlag, element.animationsByFlag)
+		element.multipliersByFlag = copyTable(multipliersByFlag, element.multipliersByFlag)
+		element.xOffsetsByAnimation = copyTable(xOffsetsByAnimation, element.xOffsetsByAnimation)
+		element.yOffsetsByAnimation = copyTable(yOffsetsByAnimation, element.yOffsetsByAnimation)
 
 		element:SetScript("OnHide", onShowHide)
 		element:SetScript("OnShow", onShowHide)
