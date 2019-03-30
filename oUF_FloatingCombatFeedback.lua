@@ -185,11 +185,9 @@ local function onUpdate(self, elapsed)
 			removeString(self, index, string)
 		else
 			string.progress = string.elapsed / self.scrollTime
-
 			string:SetPoint("CENTER", self, "CENTER", string:GetXY())
 
 			string.elapsed = string.elapsed + elapsed
-
 			string:SetAlpha(clamp(1 - (string.elapsed - self.fadeTime) / (self.scrollTime - self.fadeTime)))
 		end
 	end
