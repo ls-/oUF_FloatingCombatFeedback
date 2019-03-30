@@ -6,6 +6,7 @@ local _G = getfenv(0)
 local m_cos = _G.math.cos
 local m_max = _G.math.max
 local m_pi = _G.math.pi
+local m_random = _G.math.random
 local m_sin = _G.math.sin
 local next = _G.next
 local t_insert = _G.table.insert
@@ -93,6 +94,13 @@ local animations = {
 	["static"] = function(self)
 		return self.x, self.y
 	end,
+	["random"] = function(self)
+		if self.elapsed == 0 then
+			self.x, self.y = m_random(-self.radius * 0.66, self.radius * 0.66), m_random(-self.radius * 0.66, self.radius * 0.66)
+		end
+
+		return self.x, self.y
+	end,
 }
 
 local animationsByEvent = {
@@ -122,6 +130,7 @@ local xOffsetsByAnimation = {
 	["diagonal"  ] = 24,
 	["fountain"  ] = 24,
 	["horizontal"] = 8,
+	["random"    ] = 0,
 	["static"    ] = 0,
 	["vertical"  ] = 8,
 }
@@ -130,6 +139,7 @@ local yOffsetsByAnimation = {
 	["diagonal"  ] = 8,
 	["fountain"  ] = 8,
 	["horizontal"] = 8,
+	["random"    ] = 0,
 	["static"    ] = 0,
 	["vertical"  ] = 8,
 }
@@ -165,10 +175,9 @@ local function onUpdate(self, elapsed)
 		if string.elapsed >= string.scrollTime then
 			removeString(self, index, string)
 		else
-			string.elapsed = string.elapsed + elapsed
-
 			string:SetPoint("CENTER", self, "CENTER", string:GetXY())
 
+			string.elapsed = string.elapsed + elapsed
 			if string.elapsed >= self.fadeout then
 				string:SetAlpha(m_max(1 - (string.elapsed - self.fadeout) / (self.scrollTime - self.fadeout), 0))
 			end
@@ -249,7 +258,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string:SetTextHeight(element.fontHeight * element.multipliersByFlag[flag])
 		string:SetTextColor(color.r, color.g, color.b)
 		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
-		string:SetAlpha(1)
+		string:SetAlpha(0)
 		string:Show()
 
 		t_insert(element.FeedbackToAnimate, string)
