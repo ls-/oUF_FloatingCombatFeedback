@@ -130,9 +130,12 @@ local animationsByEvent = {
 }
 
 local animationsByFlag = {
+	["ABSORB"  ] = false,
+	["BLOCK"   ] = false,
 	["CRITICAL"] = false,
 	["CRUSHING"] = false,
 	["GLANCING"] = false,
+	["RESIST"  ] = false,
 }
 
 local xOffsetsByAnimation = {
@@ -155,9 +158,12 @@ local yOffsetsByAnimation = {
 
 local multipliersByFlag = {
 	[""        ] = 1,
+	["ABSORB"  ] = 0.75,
+	["BLOCK"   ] = 0.75,
 	["CRITICAL"] = 1.25,
 	["CRUSHING"] = 1.25,
 	["GLANCING"] = 0.75,
+	["RESIST"  ] = 0.75,
 }
 
 local function removeString(self, i, string)
