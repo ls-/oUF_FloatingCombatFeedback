@@ -76,20 +76,20 @@ local schoolColors = {
 
 local animations = {
 	["fountain"] = function(self)
-		return self.x + self.xDirection * self.radius * (1 - m_cos(m_pi / 2 * self.elapsed / self.scrollTime)),
-			self.y + self.yDirection * self.radius * m_sin(m_pi / 2 * self.elapsed / self.scrollTime)
+		return self.x + self.xDirection * self.radius * (1 - m_cos(m_pi / 2 * self.progress)),
+			self.y + self.yDirection * self.radius * m_sin(m_pi / 2 * self.progress)
 	end,
 	["vertical"] = function(self)
 		return self.x,
-			self.y + self.yDirection * self.radius * self.elapsed / self.scrollTime
+			self.y + self.yDirection * self.radius * self.progress
 	end,
 	["horizontal"] = function(self)
-		return self.x  + self.xDirection * self.radius * self.elapsed / self.scrollTime,
+		return self.x + self.xDirection * self.radius * self.progress,
 			self.y
 	end,
 	["diagonal"] = function(self)
-		return self.x  + self.xDirection * self.radius * self.elapsed / self.scrollTime,
-			self.y + self.yDirection * self.radius * self.elapsed / self.scrollTime
+		return self.x + self.xDirection * self.radius * self.progress,
+			self.y + self.yDirection * self.radius * self.progress
 	end,
 	["static"] = function(self)
 		return self.x, self.y
@@ -172,9 +172,11 @@ end
 
 local function onUpdate(self, elapsed)
 	for index, string in next, self.FeedbackToAnimate do
-		if string.elapsed >= string.scrollTime then
+		if string.elapsed >= self.scrollTime then
 			removeString(self, index, string)
 		else
+			string.progress = string.elapsed / self.scrollTime
+
 			string:SetPoint("CENTER", self, "CENTER", string:GetXY())
 
 			string.elapsed = string.elapsed + elapsed
@@ -248,7 +250,6 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.elapsed = 0
 		string.GetXY = element.animations[animation]
 		string.radius = element.radius
-		string.scrollTime = element.scrollTime
 		string.xDirection = element.xDirection
 		string.yDirection = element.yDirection
 		string.x = string.xDirection * element.xOffsetsByAnimation[animation]
