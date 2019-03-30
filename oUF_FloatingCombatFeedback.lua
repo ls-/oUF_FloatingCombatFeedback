@@ -173,6 +173,10 @@ local function onUpdate(self, elapsed)
 			end
 		end
 	end
+
+	if #self.FeedbackToAnimate == 0 then
+		self:SetScript("OnUpdate", nil)
+	end
 end
 
 local function onShowHide(self)
@@ -243,6 +247,10 @@ local function Update(self, _, unit, event, flag, amount, school)
 
 		t_insert(element.FeedbackToAnimate, string)
 
+		if not element:GetScript("OnUpdate") then
+			element:SetScript("OnUpdate", onUpdate)
+		end
+
 		if element.alternateX then
 			element.xDirection = element.xDirection * -1
 		end
@@ -298,7 +306,6 @@ local function Enable(self)
 
 		element:SetScript("OnHide", onShowHide)
 		element:SetScript("OnShow", onShowHide)
-		element:SetScript("OnUpdate", onUpdate)
 
 		self:RegisterEvent("UNIT_COMBAT", Path)
 
