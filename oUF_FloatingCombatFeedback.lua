@@ -112,10 +112,9 @@ local animationsByEvent = {
 }
 
 local animationsByFlag = {
-	-- [" "       ] = "fountain",
-	-- ["CRITICAL"] = "fountain",
-	-- ["CRUSHING"] = "fountain",
-	-- ["GLANCING"] = "fountain",
+	["CRITICAL"] = false,
+	["CRUSHING"] = false,
+	["GLANCING"] = false,
 }
 
 local xOffsetsByAnimation = {
@@ -190,8 +189,13 @@ local function Update(self, _, unit, event, flag, amount, school)
 	if self.unit ~= unit then return end
 	local element = self.FloatingCombatFeedback
 
+	local animation = element.animationsByEvent[event]
+	if not animation then return end
+
+	animation = element.animationsByFlag[flag] or animation
+
 	local text, color
-	if event == "WOUND" and not element.ignoreDamage then
+	if event == "WOUND" then
 		if amount ~= 0	then
 			if element.abbreviateNumbers then
 				text = "-" .. AbbreviateNumbers(amount)
@@ -200,11 +204,11 @@ local function Update(self, _, unit, event, flag, amount, school)
 			end
 
 			color = element.schoolColors[school] or element.colors[event]
-		elseif flag and flag ~= " " and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" and not element.ignoreMisc then
+		elseif flag and flag ~= " " and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
 			text = _G[flag]
 			color = element.colors[flag]
 		end
-	elseif event == "ENERGIZE" and not element.ignoreEnergize then
+	elseif event == "ENERGIZE" then
 		if element.abbreviateNumbers then
 			text = "+" .. AbbreviateNumbers(amount)
 		else
@@ -212,7 +216,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		end
 
 		color = element.colors[event]
-	elseif event == "HEAL" and not element.ignoreHeal then
+	elseif event == "HEAL" then
 		if element.abbreviateNumbers then
 			text = "+" .. AbbreviateNumbers(amount)
 		else
@@ -220,13 +224,12 @@ local function Update(self, _, unit, event, flag, amount, school)
 		end
 
 		color = element.colors[event]
-	elseif not element.ignoreMisc then
+	else
 		text = _G[event]
 		color = element.colors[event]
 	end
 
 	if text then
-		local animation = element.animationsByFlag[flag] or element.animationsByEvent[event]
 		local string = getString(element)
 
 		string.elapsed = 0
