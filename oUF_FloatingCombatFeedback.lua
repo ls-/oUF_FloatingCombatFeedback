@@ -70,6 +70,9 @@ local animations = {
 		return self.x  + self.xDirection * 65 * self.elapsed / self.scrollTime,
 			self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
 	end,
+	["static"] = function(self)
+		return self.x, self.y
+	end,
 }
 
 local animationsByEvent = {
@@ -100,6 +103,7 @@ local xOffsetsByAnimation = {
 	["diagonal"  ] = 24,
 	["fountain"  ] = 24,
 	["horizontal"] = 8,
+	["static"    ] = 0,
 	["vertical"  ] = 8,
 }
 
@@ -107,6 +111,7 @@ local yOffsetsByAnimation = {
 	["diagonal"  ] = 8,
 	["fountain"  ] = 8,
 	["horizontal"] = 8,
+	["static"    ] = 0,
 	["vertical"  ] = 8,
 }
 
