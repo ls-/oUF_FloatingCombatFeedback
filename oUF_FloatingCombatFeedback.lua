@@ -138,6 +138,16 @@ local animationsByFlag = {
 	["RESIST"  ] = false,
 }
 
+local multipliersByFlag = {
+	[""        ] = 1,
+	["ABSORB"  ] = 0.75,
+	["BLOCK"   ] = 0.75,
+	["CRITICAL"] = 1.25,
+	["CRUSHING"] = 1.25,
+	["GLANCING"] = 0.75,
+	["RESIST"  ] = 0.75,
+}
+
 local xOffsetsByAnimation = {
 	["diagonal"  ] = 24,
 	["fountain"  ] = 24,
@@ -154,16 +164,6 @@ local yOffsetsByAnimation = {
 	["random"    ] = 0,
 	["static"    ] = 0,
 	["vertical"  ] = 8,
-}
-
-local multipliersByFlag = {
-	[""        ] = 1,
-	["ABSORB"  ] = 0.75,
-	["BLOCK"   ] = 0.75,
-	["CRITICAL"] = 1.25,
-	["CRUSHING"] = 1.25,
-	["GLANCING"] = 0.75,
-	["RESIST"  ] = 0.75,
 }
 
 local function removeString(self, i, string)
