@@ -197,12 +197,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 	local text, sign, color
 	if event == "WOUND" then
 		if amount ~= 0	then
-			if element.abbreviateNumbers then
-				text = AbbreviateNumbers(amount)
-			else
-				text = BreakUpLargeNumbers(amount)
-			end
-
+			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 			sign = "-"
 			color = element.schoolColors[school] or element.colors[event]
 		elseif flag and flag ~= " " and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
@@ -210,25 +205,20 @@ local function Update(self, _, unit, event, flag, amount, school)
 			color = element.colors[flag]
 		end
 	elseif event == "ENERGIZE" then
-		if element.abbreviateNumbers then
-			text = AbbreviateNumbers(amount)
-		else
-			text = BreakUpLargeNumbers(amount)
-		end
-
+		text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 		sign = "+"
 		color = element.colors[event]
 	elseif event == "HEAL" then
-		if element.abbreviateNumbers then
-			text = AbbreviateNumbers(amount)
-		else
-			text = BreakUpLargeNumbers(amount)
-		end
-
+		text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 		sign = "+"
 		color = element.colors[event]
 	else
-		text = _G[event]
+		if amount ~= 0 then
+			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
+		else
+			text = _G[event]
+		end
+
 		color = element.colors[event]
 	end
 
