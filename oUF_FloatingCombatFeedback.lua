@@ -246,7 +246,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		local string = getString(element)
 
 		string.elapsed = 0
-		string.GetXY = animations[animation]
+		string.GetXY = element.animations[animation]
 		string.radius = element.radius
 		string.scrollTime = element.scrollTime
 		string.xDirection = element.xDirection
@@ -314,6 +314,7 @@ local function Enable(self)
 
 		element.colors = copyTable(colors, element.colors)
 		element.schoolColors = copyTable(schoolColors, element.schoolColors)
+		element.animations = copyTable(animations, element.animations)
 		element.animationsByEvent = copyTable(animationsByEvent, element.animationsByEvent)
 		element.animationsByFlag = copyTable(animationsByFlag, element.animationsByFlag)
 		element.multipliersByFlag = copyTable(multipliersByFlag, element.multipliersByFlag)
