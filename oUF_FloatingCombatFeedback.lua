@@ -271,7 +271,7 @@ local function Enable(self)
 		element.ForceUpdate = ForceUpdate
 		element.FeedbackToAnimate = {}
 
-		element.scrollTime = element.scrollTime or 1.5
+		element.scrollTime = element.scrollTime or 1.2
 		element.fadeout = element.scrollTime / 3
 		element.fontHeight = element.fontHeight or 18
 		element.xDirection = element.xDirection or 1
