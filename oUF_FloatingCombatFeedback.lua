@@ -285,6 +285,8 @@ local function Disable(self)
 		element:SetScript("OnShow", nil)
 		element:SetScript("OnUpdate", nil)
 
+		onShowHide(element)
+
 		self:UnregisterEvent("UNIT_COMBAT", Path)
 	end
 end
