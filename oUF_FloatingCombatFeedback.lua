@@ -15,6 +15,7 @@ local type = _G.type
 
 local AbbreviateNumbers = _G.AbbreviateNumbers
 local BreakUpLargeNumbers = _G.BreakUpLargeNumbers
+local UnitGUID = _G.UnitGUID
 
 local function copyTable(src, dst)
 	if type(dst) ~= "table" then
@@ -179,7 +180,7 @@ local function onUpdate(self, elapsed)
 	end
 end
 
-local function onShowHide(self)
+local function flush(self)
 	t_wipe(self.FeedbackToAnimate)
 
 	for i = 1, #self do
@@ -192,6 +193,12 @@ end
 local function Update(self, _, unit, event, flag, amount, school)
 	if self.unit ~= unit then return end
 	local element = self.FloatingCombatFeedback
+
+	local unitGUID = UnitGUID(unit)
+	if unitGUID ~= element.unitGUID then
+		flush(element)
+		element.unitGUID = unitGUID
+	end
 
 	local animation = element.animationsByEvent[event]
 	if not animation then return end
@@ -304,8 +311,8 @@ local function Enable(self)
 		element.xOffsetsByAnimation = copyTable(xOffsetsByAnimation, element.xOffsetsByAnimation)
 		element.yOffsetsByAnimation = copyTable(yOffsetsByAnimation, element.yOffsetsByAnimation)
 
-		element:SetScript("OnHide", onShowHide)
-		element:SetScript("OnShow", onShowHide)
+		element:SetScript("OnHide", flush)
+		element:SetScript("OnShow", flush)
 
 		self:RegisterEvent("UNIT_COMBAT", Path)
 
@@ -320,7 +327,7 @@ local function Disable(self)
 		element:SetScript("OnShow", nil)
 		element:SetScript("OnUpdate", nil)
 
-		onShowHide(element)
+		flush(element)
 
 		self:UnregisterEvent("UNIT_COMBAT", Path)
 	end
