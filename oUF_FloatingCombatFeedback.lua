@@ -134,7 +134,7 @@ local yOffsetsByAnimation = {
 }
 
 local multipliersByFlag = {
-	[" "       ] = 1,
+	[""        ] = 1,
 	["CRITICAL"] = 1.25,
 	["CRUSHING"] = 1.25,
 	["GLANCING"] = 0.75,
@@ -204,7 +204,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 			sign = "-"
 			color = element.schoolColors[school] or element.colors[event]
-		elseif flag and flag ~= " " and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
+		elseif flag and flag ~= "" and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
 			text = _G[flag]
 			color = element.colors[flag]
 		end
