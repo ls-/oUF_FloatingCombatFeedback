@@ -219,11 +219,11 @@ local function Update(self, _, unit, event, flag, amount, school)
 		if amount ~= 0	then
 			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 			sign = "-"
-			color = element.schoolColors[school] or element.colors[event]
-		elseif flag and flag ~= "" and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
+		elseif flag ~= "" and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
 			text = _G[flag]
-			color = element.colors[flag]
 		end
+
+		color = element.schoolColors[school] or element.colors[event]
 	elseif event == "ENERGIZE" then
 		text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 		sign = "+"
