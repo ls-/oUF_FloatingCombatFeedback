@@ -180,8 +180,8 @@ local function onUpdate(self, elapsed)
 			string:SetPoint("CENTER", self, "CENTER", string:GetXY())
 
 			string.elapsed = string.elapsed + elapsed
-			if string.elapsed >= self.fadeout then
-				string:SetAlpha(m_max(1 - (string.elapsed - self.fadeout) / (self.scrollTime - self.fadeout), 0))
+			if string.elapsed >= self.fadeTime then
+				string:SetAlpha(m_max(1 - (string.elapsed - self.fadeTime) / (self.scrollTime - self.fadeTime), 0))
 			end
 		end
 	end
@@ -294,7 +294,7 @@ local function Enable(self)
 		element.FeedbackToAnimate = {}
 
 		element.scrollTime = element.scrollTime or 1.2
-		element.fadeout = element.scrollTime / 3
+		element.fadeTime = element.fadeTime or element.scrollTime / 3
 		element.fontHeight = element.fontHeight or 18
 		element.format = element.format or "%1$s"
 		element.radius = element.radius or 65
