@@ -194,15 +194,16 @@ local function Update(self, _, unit, event, flag, amount, school)
 
 	animation = element.animationsByFlag[flag] or animation
 
-	local text, color
+	local text, sign, color
 	if event == "WOUND" then
 		if amount ~= 0	then
 			if element.abbreviateNumbers then
-				text = "-" .. AbbreviateNumbers(amount)
+				text = AbbreviateNumbers(amount)
 			else
-				text = "-" .. BreakUpLargeNumbers(amount)
+				text = BreakUpLargeNumbers(amount)
 			end
 
+			sign = "-"
 			color = element.schoolColors[school] or element.colors[event]
 		elseif flag and flag ~= " " and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
 			text = _G[flag]
@@ -210,19 +211,21 @@ local function Update(self, _, unit, event, flag, amount, school)
 		end
 	elseif event == "ENERGIZE" then
 		if element.abbreviateNumbers then
-			text = "+" .. AbbreviateNumbers(amount)
+			text = AbbreviateNumbers(amount)
 		else
-			text = "+" .. BreakUpLargeNumbers(amount)
+			text = BreakUpLargeNumbers(amount)
 		end
 
+		sign = "+"
 		color = element.colors[event]
 	elseif event == "HEAL" then
 		if element.abbreviateNumbers then
-			text = "+" .. AbbreviateNumbers(amount)
+			text = AbbreviateNumbers(amount)
 		else
-			text = "+" .. BreakUpLargeNumbers(amount)
+			text = BreakUpLargeNumbers(amount)
 		end
 
+		sign = "+"
 		color = element.colors[event]
 	else
 		text = _G[event]
@@ -240,7 +243,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.x = string.xDirection * element.xOffsetsByAnimation[animation]
 		string.y = string.yDirection * element.yOffsetsByAnimation[animation]
 
-		string:SetText(text)
+		string:SetFormattedText(element.format, text, sign or "")
 		string:SetTextHeight(element.fontHeight * element.multipliersByFlag[flag])
 		string:SetTextColor(color.r, color.g, color.b)
 		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
@@ -277,6 +280,7 @@ local function Enable(self)
 		element.scrollTime = element.scrollTime or 1.2
 		element.fadeout = element.scrollTime / 3
 		element.fontHeight = element.fontHeight or 18
+		element.format = element.format or "%1$s"
 		element.xDirection = element.xDirection or 1
 		element.yDirection = element.yDirection or 1
 
