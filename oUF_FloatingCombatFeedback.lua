@@ -74,20 +74,20 @@ local schoolColors = {
 
 local animations = {
 	["fountain"] = function(self)
-		return self.x + self.xDirection * 65 * (1 - m_cos(m_pi / 2 * self.elapsed / self.scrollTime)),
-			self.y + self.yDirection * 65 * m_sin(m_pi / 2 * self.elapsed / self.scrollTime)
+		return self.x + self.xDirection * self.radius * (1 - m_cos(m_pi / 2 * self.elapsed / self.scrollTime)),
+			self.y + self.yDirection * self.radius * m_sin(m_pi / 2 * self.elapsed / self.scrollTime)
 	end,
 	["vertical"] = function(self)
 		return self.x,
-			self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
+			self.y + self.yDirection * self.radius * self.elapsed / self.scrollTime
 	end,
 	["horizontal"] = function(self)
-		return self.x  + self.xDirection * 65 * self.elapsed / self.scrollTime,
+		return self.x  + self.xDirection * self.radius * self.elapsed / self.scrollTime,
 			self.y
 	end,
 	["diagonal"] = function(self)
-		return self.x  + self.xDirection * 65 * self.elapsed / self.scrollTime,
-			self.y + self.yDirection * 65 * self.elapsed / self.scrollTime
+		return self.x  + self.xDirection * self.radius * self.elapsed / self.scrollTime,
+			self.y + self.yDirection * self.radius * self.elapsed / self.scrollTime
 	end,
 	["static"] = function(self)
 		return self.x, self.y
@@ -237,6 +237,7 @@ local function Update(self, _, unit, event, flag, amount, school)
 
 		string.elapsed = 0
 		string.GetXY = animations[animation]
+		string.radius = element.radius
 		string.scrollTime = element.scrollTime
 		string.xDirection = element.xDirection
 		string.yDirection = element.yDirection
@@ -281,6 +282,7 @@ local function Enable(self)
 		element.fadeout = element.scrollTime / 3
 		element.fontHeight = element.fontHeight or 18
 		element.format = element.format or "%1$s"
+		element.radius = element.radius or 65
 		element.xDirection = element.xDirection or 1
 		element.yDirection = element.yDirection or 1
 
