@@ -1,3 +1,12 @@
+# CHANGELOG
+
+## Version 4.0.0
+
+- Rewrote the entire plugin. Readopted semver because using INTERFACE_VERSION  
+  for a plugin that's so rarely updated isn't a good choice;  
+- Numerous new options. It's way more configurable now. Please, see the README  
+  at GitHub or just read the code.
+
 ## Version 70200.02
 
 - Made sure that it's possible to update all options on the fly.
