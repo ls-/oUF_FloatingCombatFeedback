@@ -3,11 +3,14 @@ local oUF = ns.oUF or oUF
 assert(oUF, "oUF FloatingCombatFeedback was unable to locate oUF install")
 
 local _G = getfenv(0)
+local b_and = _G.bit.band
+local hooksecurefunc = _G.hooksecurefunc
 local m_cos = _G.math.cos
 local m_pi = _G.math.pi
 local m_random = _G.math.random
 local m_sin = _G.math.sin
 local next = _G.next
+local select = _G.select
 local t_insert = _G.table.insert
 local t_remove = _G.table.remove
 local t_wipe = _G.table.wipe
@@ -15,6 +18,8 @@ local type = _G.type
 
 local AbbreviateNumbers = _G.AbbreviateNumbers
 local BreakUpLargeNumbers = _G.BreakUpLargeNumbers
+local CombatLogGetCurrentEventInfo = _G.CombatLogGetCurrentEventInfo
+local GetSpellTexture = _G.GetSpellTexture
 local UnitGUID = _G.UnitGUID
 
 local function copyTable(src, dst)
@@ -236,7 +241,7 @@ local function flush(self)
 	end
 end
 
-local function Update(self, _, unit, event, flag, amount, school)
+local function Update(self, _, unit, event, flag, amount, school, texture)
 	if self.unit ~= unit then return end
 	local element = self.FloatingCombatFeedback
 
@@ -281,8 +286,8 @@ local function Update(self, _, unit, event, flag, amount, school)
 		string.x = string.xDirection * element.xOffsetsByAnimation[animation]
 		string.y = string.yDirection * element.yOffsetsByAnimation[animation]
 
-		string:SetText(text)
-		string:SetTextHeight(element.fontHeight * (element.multipliersByFlag[flag] or element.multipliersByFlag[""]))
+		string:SetFont(element.font, element.fontHeight * (element.multipliersByFlag[flag] or element.multipliersByFlag[""]), element.fontFlags)
+		string:SetFormattedText(element.format, text, texture or "")
 		string:SetTextColor(color.r, color.g, color.b)
 		string:SetPoint("CENTER", element, "CENTER", string.x, string.y)
 		string:SetAlpha(0)
@@ -312,16 +317,193 @@ local function ForceUpdate(element)
 	Path(element.__owner, "ForceUpdate", element.__owner.unit)
 end
 
+local iconOverrides = {
+	[136243] = "",
+	["Interface\\Icons\\Trade_Engineering"] = "",
+}
+
+local iconCache = {}
+
+local function getTexture(spellID)
+	if not iconCache[spellID] then
+		local texture = GetSpellTexture(spellID)
+		iconCache[spellID] = iconOverrides[texture] or texture
+	end
+
+	return iconCache[spellID]
+end
+
+local function getEventFlag(resisted, blocked, absorbed, critical, glancing, crushing)
+	return (resisted and resisted > 0) and "RESIST"
+		or (blocked and blocked > 0) and "BLOCK"
+		or (absorbed and absorbed > 0) and "ABSORB"
+		or critical and "CRITICAL"
+		or glancing and "GLANCING"
+		or crushing and "CRUSHING"
+		or ""
+end
+
+local function prep(event, ...)
+	local flag, amount, school, texture, _
+
+	if event == "ENVIRONMENTAL_DAMAGE" then
+		_, amount, _, school = ...
+		flag = getEventFlag(select(5, ...))
+		event = "WOUND"
+	elseif event == "RANGE_DAMAGE" or event == "SPELL_BUILDING_DAMAGE" or event == "SPELL_DAMAGE" or event == "SPELL_PERIODIC_DAMAGE" then
+		_, _, _, amount, _, school = ...
+		flag = getEventFlag(select(7, ...))
+		texture = getTexture(...)
+		event = "WOUND"
+	elseif event == "SWING_DAMAGE" then
+		amount, _, school = ...
+		flag = getEventFlag(select(4, ...))
+		event = "WOUND"
+	elseif event == "SPELL_BUILDING_HEAL" or event == "SPELL_HEAL" or event == "SPELL_PERIODIC_HEAL" then
+		_, _, school, amount = ...
+		flag = getEventFlag(nil, nil, select(6, ...))
+		texture = getTexture(...)
+		event = "HEAL"
+	elseif event == "RANGE_MISSED" or event == "SPELL_MISSED" or event == "SPELL_PERIODIC_MISSED" then
+		_, _, school, flag = ...
+		texture = getTexture(...)
+		event = flag
+	elseif event == "SWING_MISSED" then
+		flag = ...
+		event = flag
+	end
+
+	return event, flag, amount or 0, school or SCHOOL_MASK_NONE, texture
+end
+
+local playerGUID = UnitGUID("player")
+local COMBATLOG_OBJECT_AFFILIATION_MINE = _G.COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
+
+local frameToGUID = {}
+local guidToFrame = {}
+
+local CLEUEvents = {
+	-- damage
+	["ENVIRONMENTAL_DAMAGE" ] = true, -- environmentalType, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
+	["RANGE_DAMAGE"         ] = true, -- spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = ...
+	["SPELL_BUILDING_DAMAGE"] = true, -- spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = ...
+	["SPELL_DAMAGE"         ] = true, -- spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = ...
+	["SPELL_PERIODIC_DAMAGE"] = true, -- spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = ...
+	-- miss
+	["RANGE_MISSED"         ] = true, -- spellId, spellName, spellSchool, missType, isOffHand, amountMissed = ...
+	["SPELL_MISSED"         ] = true, -- spellId, spellName, spellSchool, missType, isOffHand, amountMissed = ...
+	["SPELL_PERIODIC_MISSED"] = true, -- spellId, spellName, spellSchool, missType, isOffHand, amountMissed = ...
+	-- heal
+	["SPELL_BUILDING_HEAL"  ] = true, -- spellId, spellName, spellSchool, amount, overhealing, absorbed, critical = ...
+	["SPELL_HEAL"           ] = true, -- spellId, spellName, spellSchool, amount, overhealing, absorbed, critical = ...
+	["SPELL_PERIODIC_HEAL"  ] = true, -- spellId, spellName, spellSchool, amount, overhealing, absorbed, critical = ...
+	-- swing
+	["SWING_DAMAGE"         ] = true, -- amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = ...
+	["SWING_MISSED"         ] = true, -- missType, isOffHand, amountMissed = ...
+}
+
+local function hasFlag(flags, flag)
+	return b_and(flags, flag) > 0
+end
+
+local function filter(_, event, _, srcGUID, _, srcFlags, _, dstGUID, _, _, _, ...)
+	if guidToFrame[dstGUID] and CLEUEvents[event] then
+		if dstGUID == playerGUID or (srcGUID == playerGUID or hasFlag(srcFlags, COMBATLOG_OBJECT_AFFILIATION_MINE)) then
+			for frame in next, guidToFrame[dstGUID] do
+				Path(frame, "COMBAT_LOG_EVENT_UNFILTERED", frame.unit, prep(event, ...))
+			end
+		end
+	end
+end
+
+local CLEUDispatcher = CreateFrame("Frame")
+CLEUDispatcher:SetScript("OnEvent", function()
+	filter(CombatLogGetCurrentEventInfo())
+end)
+
+local function unGUIDe(frame)
+	local guid = frameToGUID[frame]
+	if guid then
+		frameToGUID[frame] = nil
+
+		if guidToFrame[guid] then
+			guidToFrame[guid][frame] = nil
+		end
+	end
+end
+
+local function GUIDe(frame, unit)
+	if unit then
+		local guid = UnitGUID(unit)
+		if guid then
+			frameToGUID[frame] = guid
+
+			if not guidToFrame[guid] then
+				guidToFrame[guid] = {}
+			end
+
+			guidToFrame[guid][frame] = true
+
+			return
+		end
+	end
+
+	unGUIDe(frame)
+end
+
+local function uaeHook(self, event)
+	if event ~= "OnUpdate" then
+		GUIDe(self, self.unit)
+	end
+end
+
+local hookedFrames = {}
+local cleuElements = {}
+
+local function EnableCLEU(element, state, force)
+	local frame = element.__owner
+
+	if element.useCLEU ~= state or force then
+		element.useCLEU = state
+		if element.useCLEU then
+			frame:UnregisterEvent("UNIT_COMBAT", Path)
+			CLEUDispatcher:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+
+			if not hookedFrames[frame] then
+				hooksecurefunc(frame, "UpdateAllElements", uaeHook)
+				hookedFrames[frame] = true
+			end
+
+			GUIDe(frame, frame.unit)
+
+			cleuElements[element] = true
+		else
+			frame:RegisterEvent("UNIT_COMBAT", Path)
+
+			unGUIDe(frame)
+
+			cleuElements[element] = nil
+			if not next(cleuElements) then
+				CLEUDispatcher:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			end
+		end
+	end
+end
+
 local function Enable(self)
 	local element = self.FloatingCombatFeedback
 	if element then
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
+		element.EnableCLEU = EnableCLEU
 		element.FeedbackToAnimate = {}
 
 		element.scrollTime = element.scrollTime or 1.2
 		element.fadeTime = element.fadeTime or element.scrollTime / 3
+		element.font = element.font or "Fonts\\FRIZQT__.TTF"
+		element.fontFlags = element.fontFlags or ""
 		element.fontHeight = element.fontHeight or 18
+		element.format = element.format or "%1$s" -- "%1$s |T%2$s:0:0:0:0:64:64:4:60:4:60|t"
 		element.radius = element.radius or 65
 		element.xDirection = element.xDirection or 1
 		element.yDirection = element.yDirection or 1
@@ -349,8 +531,7 @@ local function Enable(self)
 
 		element:SetScript("OnHide", flush)
 		element:SetScript("OnShow", flush)
-
-		self:RegisterEvent("UNIT_COMBAT", Path)
+		element:EnableCLEU(element.useCLEU, true)
 
 		return true
 	end
@@ -366,6 +547,13 @@ local function Disable(self)
 		flush(element)
 
 		self:UnregisterEvent("UNIT_COMBAT", Path)
+
+		unGUIDe(self)
+
+		cleuElements[element] = nil
+		if not next(cleuElements) then
+			CLEUDispatcher:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		end
 	end
 end
 
