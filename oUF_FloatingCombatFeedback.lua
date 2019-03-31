@@ -55,32 +55,55 @@ local SCHOOL_MASK_FROST = _G.SCHOOL_MASK_FROST or 0x10
 local SCHOOL_MASK_SHADOW = _G.SCHOOL_MASK_SHADOW or 0x20
 local SCHOOL_MASK_ARCANE = _G.SCHOOL_MASK_ARCANE or 0x40
 
+-- multi-schools
+local SCHOOL_MASK_ASTRAL = SCHOOL_MASK_ARCANE + SCHOOL_MASK_NATURE
+local SCHOOL_MASK_CHAOS = SCHOOL_MASK_ARCANE + SCHOOL_MASK_FIRE + SCHOOL_MASK_FROST + SCHOOL_MASK_HOLY + SCHOOL_MASK_NATURE + SCHOOL_MASK_PHYSICAL + SCHOOL_MASK_SHADOW
+local SCHOOL_MASK_ELEMENTAL = SCHOOL_MASK_FIRE + SCHOOL_MASK_FROST + SCHOOL_MASK_NATURE
+local SCHOOL_MASK_MAGIC =  SCHOOL_MASK_ARCANE + SCHOOL_MASK_FIRE + SCHOOL_MASK_FROST + SCHOOL_MASK_HOLY + SCHOOL_MASK_NATURE + SCHOOL_MASK_SHADOW
+local SCHOOL_MASK_PLAGUE = SCHOOL_MASK_NATURE + SCHOOL_MASK_SHADOW
+local SCHOOL_MASK_RADIANT = SCHOOL_MASK_FIRE + SCHOOL_MASK_HOLY
+local SCHOOL_MASK_SHADOWFLAME = SCHOOL_MASK_FIRE + SCHOOL_MASK_SHADOW
+local SCHOOL_MASK_SHADOWFROST = SCHOOL_MASK_FROST + SCHOOL_MASK_SHADOW
+
+local function rgb(r, g, b)
+	return {r = r / 255, g = g / 255, b = b /255}
+end
+
 local colors = {
-	["ABSORB"   ] = {r = 1.00, g = 1.00, b = 1.00},
-	["BLOCK"    ] = {r = 1.00, g = 1.00, b = 1.00},
-	["DEFLECT"  ] = {r = 1.00, g = 1.00, b = 1.00},
-	["DODGE"    ] = {r = 1.00, g = 1.00, b = 1.00},
-	["ENERGIZE" ] = {r = 0.41, g = 0.80, b = 0.94},
-	["EVADE"    ] = {r = 1.00, g = 1.00, b = 1.00},
-	["HEAL"     ] = {r = 0.10, g = 0.80, b = 0.10},
-	["IMMUNE"   ] = {r = 1.00, g = 1.00, b = 1.00},
-	["INTERRUPT"] = {r = 1.00, g = 1.00, b = 1.00},
-	["MISS"     ] = {r = 1.00, g = 1.00, b = 1.00},
-	["PARRY"    ] = {r = 1.00, g = 1.00, b = 1.00},
-	["REFLECT"  ] = {r = 1.00, g = 1.00, b = 1.00},
-	["RESIST"   ] = {r = 1.00, g = 1.00, b = 1.00},
-	["WOUND"    ] = {r = 0.70, g = 0.10, b = 0.10},
+	["ABSORB"   ] = rgb(255, 255, 255),
+	["BLOCK"    ] = rgb(255, 255, 255),
+	["DEFLECT"  ] = rgb(255, 255, 255),
+	["DODGE"    ] = rgb(255, 255, 255),
+	["ENERGIZE" ] = rgb(105, 204, 240),
+	["EVADE"    ] = rgb(255, 255, 255),
+	["HEAL"     ] = rgb(26, 204, 26),
+	["IMMUNE"   ] = rgb(255, 255, 255),
+	["INTERRUPT"] = rgb(255, 255, 255),
+	["MISS"     ] = rgb(255, 255, 255),
+	["PARRY"    ] = rgb(255, 255, 255),
+	["REFLECT"  ] = rgb(255, 255, 255),
+	["RESIST"   ] = rgb(255, 255, 255),
+	["WOUND"    ] = rgb(179, 26, 26),
 }
 
 local schoolColors = {
-	[SCHOOL_MASK_ARCANE  ] = {r = 1.00, g = 0.50, b = 1.00},
-	[SCHOOL_MASK_FIRE    ] = {r = 1.00, g = 0.50, b = 0.00},
-	[SCHOOL_MASK_FROST   ] = {r = 0.50, g = 1.00, b = 1.00},
-	[SCHOOL_MASK_HOLY    ] = {r = 1.00, g = 0.90, b = 0.50},
-	[SCHOOL_MASK_NATURE  ] = {r = 0.30, g = 1.00, b = 0.30},
-	[SCHOOL_MASK_NONE    ] = {r = 1.00, g = 1.00, b = 1.00},
-	[SCHOOL_MASK_PHYSICAL] = {r = 0.70, g = 0.10, b = 0.10},
-	[SCHOOL_MASK_SHADOW  ] = {r = 0.50, g = 0.50, b = 1.00},
+	[SCHOOL_MASK_ARCANE     ] = rgb(255, 128, 255),
+	[SCHOOL_MASK_FIRE       ] = rgb(255, 128, 000),
+	[SCHOOL_MASK_FROST      ] = rgb(128, 255, 255),
+	[SCHOOL_MASK_HOLY       ] = rgb(255, 230, 128),
+	[SCHOOL_MASK_NATURE     ] = rgb(77, 255, 77),
+	[SCHOOL_MASK_NONE       ] = rgb(255, 255, 255),
+	[SCHOOL_MASK_PHYSICAL   ] = rgb(179, 26, 26),
+	[SCHOOL_MASK_SHADOW     ] = rgb(128, 128, 255),
+	-- multi-schools
+	[SCHOOL_MASK_ASTRAL     ] = rgb(166, 192, 166),
+	[SCHOOL_MASK_CHAOS      ] = rgb(182, 164, 142),
+	[SCHOOL_MASK_ELEMENTAL  ] = rgb(153, 212, 111),
+	[SCHOOL_MASK_MAGIC      ] = rgb(183, 187, 162),
+	[SCHOOL_MASK_PLAGUE     ] = rgb(103, 192, 166),
+	[SCHOOL_MASK_RADIANT    ] = rgb(255, 178, 64),
+	[SCHOOL_MASK_SHADOWFLAME] = rgb(192, 128, 128),
+	[SCHOOL_MASK_SHADOWFROST] = rgb(128, 192, 255),
 }
 
 local animations = {
