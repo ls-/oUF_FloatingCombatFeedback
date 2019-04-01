@@ -458,14 +458,14 @@ local function GUIDe(frame, unit)
 	unGUIDe(frame)
 end
 
+local hookedFrames = {}
+local cleuElements = {}
+
 local function uaeHook(self, event)
-	if event ~= "OnUpdate" then
+	if event ~= "OnUpdate" and next(cleuElements) then
 		GUIDe(self, self.unit)
 	end
 end
-
-local hookedFrames = {}
-local cleuElements = {}
 
 local function EnableCLEU(element, state, force)
 	local frame = element.__owner
