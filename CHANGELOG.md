@@ -2,11 +2,11 @@
 
 ## Version 4.1.0
 
-- Added `COMBAT_LOG_EVENT_UNFILTERED` support. See [Usage > Modes](https://github.com/ls-/oUF_FloatingCombatFeedback/tree/dev#modes);
+- Added `COMBAT_LOG_EVENT_UNFILTERED` support. See [Options > Modes](https://github.com/ls-/oUF_FloatingCombatFeedback/tree/dev#modes);
 - Added colours for known multi-schools. See [Options > Colours](https://github.com/ls-/oUF_FloatingCombatFeedback/tree/dev#colours);
 - Reworked the way the font is handled. There's no need to use FontObject templates anymore, they  
   are optional now, to set the font and its flags use `.font` and `.fontFlags` options. See  
-  [Options > Text](https://github.com/ls-/oUF_FloatingCombatFeedback/tree/dev#text);
+  [Options > Text](https://github.com/ls-/oUF_FloatingCombatFeedback/tree/dev#text).
 
 ## Version 4.0.0
 
