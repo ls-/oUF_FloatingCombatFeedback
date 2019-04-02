@@ -507,13 +507,15 @@ local function Enable(self)
 
 		element.scrollTime = element.scrollTime or 1.2
 		element.fadeTime = element.fadeTime or element.scrollTime / 3
-		element.font = element.font or "Fonts\\FRIZQT__.TTF"
-		element.fontFlags = element.fontFlags or ""
-		element.fontHeight = element.fontHeight or 18
 		element.format = element.format or "%1$s" -- "%1$s |T%2$s:0:0:0:0:64:64:4:60:4:60|t"
 		element.radius = element.radius or 65
 		element.xDirection = element.xDirection or 1
 		element.yDirection = element.yDirection or 1
+
+		local font, _, fontFlags = element[1]:GetFont()
+		element.font = element.font or font or "Fonts\\FRIZQT__.TTF"
+		element.fontHeight = element.fontHeight or 18
+		element.fontFlags = element.fontFlags or fontFlags or ""
 
 		if element.alternateX == nil then
 			element.alternateX = true
@@ -524,6 +526,7 @@ local function Enable(self)
 		end
 
 		for i = 1, #element do
+			element[i]:SetFont(element.font, element.fontHeight, element.fontFlags)
 			element[i]:Hide()
 		end
 
