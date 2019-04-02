@@ -161,7 +161,29 @@ self.FloatingCombatFeedback.colors["INTERRUPT"] = {r = 0.6, g = 0.6, b = 0.6}
 self.FloatingCombatFeedback.schoolColors[SCHOOL_MASK_ARCANE] = {r = 0, g = 1, b = 1}
 ```
 
-**Note:** `SCHOOL_MASK_*` are variables and not strings.
+`SCHOOL_MASK_*` are variables and not strings:
+
+```Lua
+-- Blizz's globals, can be used as is
+SCHOOL_MASK_NONE = 0
+SCHOOL_MASK_PHYSICAL = 1
+SCHOOL_MASK_HOLY = 2
+SCHOOL_MASK_FIRE = 4
+SCHOOL_MASK_NATURE = 8
+SCHOOL_MASK_FROST = 16
+SCHOOL_MASK_SHADOW = 32
+SCHOOL_MASK_ARCANE = 64
+
+-- plugin's locals, use their values
+SCHOOL_MASK_ASTRAL = 72
+SCHOOL_MASK_CHAOS = 127
+SCHOOL_MASK_ELEMENTAL = 28
+SCHOOL_MASK_MAGIC = 126
+SCHOOL_MASK_PLAGUE = 40
+SCHOOL_MASK_RADIANT = 6
+SCHOOL_MASK_SHADOWFLAME = 36
+SCHOOL_MASK_SHADOWFROST = 48
+```
 
 ### Text
 
