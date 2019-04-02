@@ -1,6 +1,6 @@
 # oUF: FloatingCombatFeedback
 
-oUF: FloatingCombatFeedback is a plug-in for oUF framework.
+oUF: FloatingCombatFeedback is a plugin for oUF framework.
 
 ## Download
 
@@ -17,15 +17,29 @@ fcf:SetPoint("CENTER")
 
 for i = 1, 6 do
     -- give names to these font strings to avoid breaking /fstack and /tinspect
-    fcf[i] = fcf:CreateFontString("$parentFCFText" .. i, "OVERLAY", "CombatTextFont")
+    fcf[i] = fcf:CreateFontString("$parentFCFText" .. i, "OVERLAY")
 end
 
 self.FloatingCombatFeedback = fcf
 ```
 
-**Note:** If you create your own font object, I **strongly recommend** to use **big font sizes**, e.g. CombatTextFont's size is 64px.
-
 ## Options
+
+### Modes
+
+The plugin can use either `UNIT_COMBAT` or `COMBAT_LOG_EVENT_UNFILTERED` to run the update. While `CLEU` fires A LOT more often than `UC`, using it allows to filter combat events by their source, the player and his/her pets, and to add abilities' icons to the floating text, whereas using `UC` doesn't allow for any of that. Performance-wise, on average using `CLEU` instead of `UC` is slower by only 0.012ms, for comparison's sake, at 60fps 1 frame lasts for 16ms, so this performance hit is negligible.
+
+To use `CLEU` set `.useCLEU` to `true` during the initial setup.
+
+```Lua
+self.FloatingCombatFeedback.useCLEU = true
+```
+
+However, if you need to enable/disable it later on, for instance, if your layout has an in-game config, use the `EnableCLEU` method:
+
+```Lua
+self.FloatingCombatFeedback:EnableCLEU(true|false)
+```
 
 ### Animations
 
@@ -89,38 +103,55 @@ You can also disable combat events:
 self.FloatingCombatFeedback.animationsByEvent["HEAL"] = false
 ```
 
-**Note:** This only applies to events, if flag's animation is set to `false`, its event's animation will be used instead.
+**Note:** This only applies to events, if a flag's animation is set to `false`, its event's animation will be used instead.
 
 ### Colours
 
 ```Lua
 local colors = {
-    ["ABSORB"   ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["BLOCK"    ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["DEFLECT"  ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["DODGE"    ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["ENERGIZE" ] = {r = 0.41, g = 0.80, b = 0.94},
-    ["EVADE"    ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["HEAL"     ] = {r = 0.10, g = 0.80, b = 0.10},
-    ["IMMUNE"   ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["INTERRUPT"] = {r = 1.00, g = 1.00, b = 1.00},
-    ["MISS"     ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["PARRY"    ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["REFLECT"  ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["RESIST"   ] = {r = 1.00, g = 1.00, b = 1.00},
-    ["WOUND"    ] = {r = 0.70, g = 0.10, b = 0.10},
+    ["ABSORB"   ] = rgb(255, 255, 255),
+    ["BLOCK"    ] = rgb(255, 255, 255),
+    ["DEFLECT"  ] = rgb(255, 255, 255),
+    ["DODGE"    ] = rgb(255, 255, 255),
+    ["ENERGIZE" ] = rgb(105, 204, 240),
+    ["EVADE"    ] = rgb(255, 255, 255),
+    ["HEAL"     ] = rgb(26, 204, 26),
+    ["IMMUNE"   ] = rgb(255, 255, 255),
+    ["INTERRUPT"] = rgb(255, 255, 255),
+    ["MISS"     ] = rgb(255, 255, 255),
+    ["PARRY"    ] = rgb(255, 255, 255),
+    ["REFLECT"  ] = rgb(255, 255, 255),
+    ["RESIST"   ] = rgb(255, 255, 255),
+    ["WOUND"    ] = rgb(179, 26, 26),
 }
 
 local schoolColors = {
-    [SCHOOL_MASK_ARCANE  ] = {r = 1.00, g = 0.50, b = 1.00},
-    [SCHOOL_MASK_FIRE    ] = {r = 1.00, g = 0.50, b = 0.00},
-    [SCHOOL_MASK_FROST   ] = {r = 0.50, g = 1.00, b = 1.00},
-    [SCHOOL_MASK_HOLY    ] = {r = 1.00, g = 0.90, b = 0.50},
-    [SCHOOL_MASK_NATURE  ] = {r = 0.30, g = 1.00, b = 0.30},
-    [SCHOOL_MASK_NONE    ] = {r = 1.00, g = 1.00, b = 1.00},
-    [SCHOOL_MASK_PHYSICAL] = {r = 0.70, g = 0.10, b = 0.10},
-    [SCHOOL_MASK_SHADOW  ] = {r = 0.50, g = 0.50, b = 1.00},
+    [SCHOOL_MASK_ARCANE     ] = rgb(255, 128, 255),
+    [SCHOOL_MASK_FIRE       ] = rgb(255, 128, 000),
+    [SCHOOL_MASK_FROST      ] = rgb(128, 255, 255),
+    [SCHOOL_MASK_HOLY       ] = rgb(255, 230, 128),
+    [SCHOOL_MASK_NATURE     ] = rgb(77, 255, 77),
+    [SCHOOL_MASK_NONE       ] = rgb(255, 255, 255),
+    [SCHOOL_MASK_PHYSICAL   ] = rgb(179, 26, 26),
+    [SCHOOL_MASK_SHADOW     ] = rgb(128, 128, 255),
+    -- multi-schools
+    [SCHOOL_MASK_ASTRAL     ] = rgb(166, 192, 166),
+    [SCHOOL_MASK_CHAOS      ] = rgb(182, 164, 142),
+    [SCHOOL_MASK_ELEMENTAL  ] = rgb(153, 212, 111),
+    [SCHOOL_MASK_MAGIC      ] = rgb(183, 187, 162),
+    [SCHOOL_MASK_PLAGUE     ] = rgb(103, 192, 166),
+    [SCHOOL_MASK_RADIANT    ] = rgb(255, 178, 64),
+    [SCHOOL_MASK_SHADOWFLAME] = rgb(192, 128, 128),
+    [SCHOOL_MASK_SHADOWFROST] = rgb(128, 192, 255),
 }
+```
+
+**Note:** `rgb` is an internal helper-method:
+
+```Lua
+local function rgb(r, g, b)
+    return {r = r / 255, g = g / 255, b = b /255}
+end
 ```
 
 You can change these colours:
@@ -130,17 +161,21 @@ self.FloatingCombatFeedback.colors["INTERRUPT"] = {r = 0.6, g = 0.6, b = 0.6}
 self.FloatingCombatFeedback.schoolColors[SCHOOL_MASK_ARCANE] = {r = 0, g = 1, b = 1}
 ```
 
-**Note:** `SCHOOL_MASK_*` are global variables and not strings.
+**Note:** `SCHOOL_MASK_*` are variables and not strings.
 
-### Text Size
+### Text
 
-By default, the font strings' height is set to 18px, which can be overridden:
+The plugin will try to get info on the font and its flags, if it fails to do so, the font and its flags will be set to `"Fonts\\FRIZQT__.TTF"` and `""` respectively. By default, the height is set to `18`px.
+
+All of these can be overridden:
 
 ```Lua
+self.FloatingCombatFeedback.font = "Fonts\\MORPHEUS.ttf"
 self.FloatingCombatFeedback.fontHeight = 24
+self.FloatingCombatFeedback.fontFlags = "THINOUTLINE"
 ```
 
-However, various event flags use multipliers to adjust the height:
+Various event flags use multipliers to adjust the height:
 
 ```Lua
 local multipliersByFlag = {
@@ -158,6 +193,16 @@ But they can be adjusted, if needed:
 
 ```Lua
 self.FloatingCombatFeedback.multipliersByFlag["CRITICAL"] = 1.5
+```
+
+If you're using `CLEU`, you might want to add an icon to your floating text:
+
+```Lua
+-- text followed by icon
+self.FloatingCombatFeedback.format = "%1$s |T%2$s:0:0:0:0:64:64:4:60:4:60|t"
+
+-- icon followed by text
+self.FloatingCombatFeedback.format = "|T%2$s:0:0:0:0:64:64:4:60:4:60|t %1$s"
 ```
 
 ### Other
