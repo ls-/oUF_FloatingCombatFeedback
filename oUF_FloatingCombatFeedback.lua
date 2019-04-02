@@ -468,9 +468,9 @@ local function uaeHook(self, event)
 end
 
 local function EnableCLEU(element, state, force)
-	local frame = element.__owner
-
 	if element.useCLEU ~= state or force then
+		local frame = element.__owner
+
 		element.useCLEU = state
 		if element.useCLEU then
 			frame:UnregisterEvent("UNIT_COMBAT", Path)
