@@ -403,7 +403,7 @@ local CLEUEvents = {
 	-- swing
 	["SWING_DAMAGE"         ] = true, -- amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = ...
 	["SWING_MISSED"         ] = true, -- missType, isOffHand, amountMissed = ...
-	["SPELL_INTERRUPT"		] = true,
+	["SPELL_INTERRUPT"] = true,
 }
 
 local function hasFlag(flags, flag)
