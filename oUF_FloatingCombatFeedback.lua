@@ -325,7 +325,7 @@ local iconOverrides = {
 local iconCache = {}
 
 local function getTexture(spellID)
-	if not iconCache[spellID] then
+	if spellID and not iconCache[spellID] then
 		local texture = GetSpellTexture(spellID)
 		iconCache[spellID] = iconOverrides[texture] or texture
 	end
