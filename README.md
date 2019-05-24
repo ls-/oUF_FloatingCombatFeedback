@@ -144,6 +144,23 @@ local schoolColors = {
     [SCHOOL_MASK_SHADOWFLAME] = rgb(192, 128, 128),
     [SCHOOL_MASK_SHADOWFROST] = rgb(128, 192, 255),
 }
+
+local tryToColorBySchool = {
+    ["ABSORB"   ] = false,
+    ["BLOCK"    ] = false,
+    ["DEFLECT"  ] = false,
+    ["DODGE"    ] = false,
+    ["ENERGIZE" ] = false,
+    ["EVADE"    ] = false,
+    ["HEAL"     ] = false,
+    ["IMMUNE"   ] = false,
+    ["INTERRUPT"] = false,
+    ["MISS"     ] = false,
+    ["PARRY"    ] = false,
+    ["REFLECT"  ] = false,
+    ["RESIST"   ] = false,
+    ["WOUND"    ] = true,
+}
 ```
 
 **Note:** `rgb` is an internal helper-method:
