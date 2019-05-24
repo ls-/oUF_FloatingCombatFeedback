@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 4.2.0
+
+- Added optional colouring by school for non-WOUND events. See the `.tryToColorBySchool` table for more info;
+- Added `SPELL_INTERRUPT` support to CLEU mode. TY Rav99@GitHub for the idea and base implementation.
+
 ## Version 4.1.0
 
 - Added `COMBAT_LOG_EVENT_UNFILTERED` support. See [Options > Modes](https://github.com/ls-/oUF_FloatingCombatFeedback/tree/dev#modes);
