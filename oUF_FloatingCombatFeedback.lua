@@ -111,6 +111,23 @@ local schoolColors = {
 	[SCHOOL_MASK_SHADOWFROST] = rgb(128, 192, 255),
 }
 
+local tryToColorBySchool = {
+	["ABSORB"   ] = false,
+	["BLOCK"    ] = false,
+	["DEFLECT"  ] = false,
+	["DODGE"    ] = false,
+	["ENERGIZE" ] = false,
+	["EVADE"    ] = false,
+	["HEAL"     ] = false,
+	["IMMUNE"   ] = false,
+	["INTERRUPT"] = false,
+	["MISS"     ] = false,
+	["PARRY"    ] = false,
+	["REFLECT"  ] = false,
+	["RESIST"   ] = false,
+	["WOUND"    ] = true,
+}
+
 local animations = {
 	["fountain"] = function(self)
 		return self.x + self.xDirection * self.radius * (1 - m_cos(m_pi / 2 * self.progress)),
@@ -256,23 +273,21 @@ local function Update(self, _, unit, event, flag, amount, school, texture)
 
 	animation = element.animationsByFlag[flag] or animation
 
-	local text, color
+	local color = element.tryToColorBySchool[event] and element.schoolColors[school] or element.colors[event]
+
+	local text
 	if event == "WOUND" then
 		if amount ~= 0	then
 			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 		elseif flag ~= "" and flag ~= "CRITICAL" and flag ~= "CRUSHING" and flag ~= "GLANCING" then
 			text = _G[flag]
 		end
-
-		color = element.schoolColors[school] or element.colors[event]
 	else
 		if amount ~= 0 then
 			text = element.abbreviateNumbers and AbbreviateNumbers(amount) or BreakUpLargeNumbers(amount)
 		else
 			text = _G[event]
 		end
-
-		color = element.colors[event]
 	end
 
 	if text then
@@ -539,6 +554,7 @@ local function Enable(self)
 
 		element.colors = copyTable(colors, element.colors)
 		element.schoolColors = copyTable(schoolColors, element.schoolColors)
+		element.tryToColorBySchool = copyTable(tryToColorBySchool, element.tryToColorBySchool)
 		element.animations = copyTable(animations, element.animations)
 		element.animationsByEvent = copyTable(animationsByEvent, element.animationsByEvent)
 		element.animationsByFlag = copyTable(animationsByFlag, element.animationsByFlag)
