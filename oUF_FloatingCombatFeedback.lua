@@ -372,7 +372,9 @@ local function prep(event, ...)
 		flag = ...
 		event = flag
 	elseif event == "SPELL_INTERRUPT" then
-		flag = getEventFlag(select(15, ...))
+		_, _, _, _, _, school = ...
+		flag = ""
+		texture = getTexture(select(4, ...))
 		event = "INTERRUPT"
 	end
 
